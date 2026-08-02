@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layouts.app')
 
 @section('title', 'Login - Sistem Penanganan Bencana BPBD')
 
