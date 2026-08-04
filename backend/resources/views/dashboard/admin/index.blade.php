@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">Dashboard Utama</h1>
-    <p class="text-gray-600 mt-2">Selamat datang, <strong>{{ auth::user()->name }}</strong>. Berikut adalah ringkasan informasi operasional BPBD terkini.</p>
+    <p class="text-gray-600 mt-2">Selamat datang, <strong>{{ auth()->user()->name }}</strong>. Berikut adalah ringkasan informasi operasional BPBD terkini.</p>
 </div>
 
 <!-- Statistik Utama -->
