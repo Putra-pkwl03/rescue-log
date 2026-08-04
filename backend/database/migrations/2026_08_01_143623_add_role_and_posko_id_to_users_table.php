@@ -6,19 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Peran akun
-            $table->enum('role', ['admin', 'komando', 'lapangan'])
-                  ->default('lapangan')
-                  ->after('email');
-            $table->foreignId('bpbd_id')->nullable()->constrained('bpbd')->onDelete('cascade');
+            $table->string('role')->default('lapangan')->after('email');
             
-            // Relasi ke Posko tempat petugas bertugas
+            // Catat: Pastikan nama tabelnya 'bpbd' atau 'bpbds'
+            $table->foreignId('bpbd_id')
+                  ->nullable()
+                  ->constrained('bpbd') 
+                  ->onDelete('cascade');
+            
             $table->foreignId('posko_id')
                   ->nullable()
                   ->after('role')
@@ -27,16 +25,15 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            // Hapus foreign key terlebih dahulu
             $table->dropForeign(['posko_id']);
-            $table->dropColumn(['role', 'posko_id']);
             $table->dropForeign(['bpbd_id']);
-            $table->dropColumn('bpbd_id');
+
+            // Hapus semua kolom yang ditambahkan
+            $table->dropColumn(['role', 'posko_id', 'bpbd_id']);
         });
     }
 };

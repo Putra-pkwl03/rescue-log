@@ -35,7 +35,6 @@ Route::middleware('auth')->group(function () {
 
     // ============ ADMIN (BPBD) ============
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        // Menggunakan Controller, bukan Closure
         Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/bencana', fn() => view('dashboard.admin.bencana.index'))->name('bencana');
@@ -47,7 +46,6 @@ Route::middleware('auth')->group(function () {
 
     // ============ KOMANDO (Posko Komando) ============
     Route::middleware('role:komando')->prefix('komando')->name('komando.')->group(function () {
-        // Menggunakan Controller agar $posko juga terisi di dashboard komando
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
         // Data Logistik
@@ -62,9 +60,8 @@ Route::middleware('auth')->group(function () {
         // Pengajuan Kebutuhan
         Route::get('/pengajuan', fn() => view('dashboard.komando.pengajuan.index'))->name('pengajuan.index');
 
-        // Pendataan Pos Kecil
-        Route::get('/posko-kecil', fn() => view('dashboard.komando.posko-kecil.index'))->name('posko-kecil.index');
-    });
+       // Ubah ->names('sub-posko') menjadi ->names('posko-kecil')
+        Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');    });
 
     // ============ LAPANGAN (Posko Kecil) ============
     Route::middleware('role:lapangan')->prefix('lapangan')->name('lapangan.')->group(function () {
