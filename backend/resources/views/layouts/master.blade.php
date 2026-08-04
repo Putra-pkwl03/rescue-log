@@ -11,14 +11,14 @@
     <div class="flex h-screen overflow-hidden">
         
         <!-- MEMANGGIL FILE SIDEBAR -->
-        @include('layouts.partials.sidebar')
+        @include('layouts.sidebar')
 
         <!-- MAIN CONTENT AREA -->
         <div class="flex-1 flex flex-col">
             <!-- Top Navbar -->
             <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
                 <div class="text-gray-800 text-xl font-semibold capitalize">
-                    Panel {{ Auth::user()->role }}
+                    Panel {{ auth::user()->role }}
                 </div>
                 <div>
                     <form action="{{ route('logout') }}" method="POST">
