@@ -29,13 +29,25 @@ class AuthController extends Controller
             // Pengalihan berdasarkan Role
             $user = Auth::user();
             
+            // if ($user->role === 'admin') {
+            //     return redirect()->intended('/dashboard/admin');
+            // } elseif ($user->role === 'koordinator_komando') {
+            //     return redirect()->intended('/dashboard/komando');
+            // } else {
+            //     return redirect()->intended('/dashboard/lapangan');
+            // }
+
             if ($user->role === 'admin') {
-                return redirect()->intended('/dashboard/admin');
-            } elseif ($user->role === 'koordinator_komando') {
-                return redirect()->intended('/dashboard/komando');
-            } else {
-                return redirect()->intended('/dashboard/lapangan');
-            }
+                return redirect()->route('admin.dashboard');
+                }
+
+                elseif ($user->role === 'koordinator_komando') {
+                    return redirect()->route('komando.dashboard');
+                }
+
+                elseif ($user->role === 'lapangan') {
+                    return redirect()->route('lapangan.dashboard');
+                }
         }
 
         // Jika login gagal
