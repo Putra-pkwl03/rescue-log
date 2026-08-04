@@ -18,7 +18,7 @@
             <!-- Top Navbar -->
             <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
                 <div class="text-gray-800 text-xl font-semibold capitalize">
-                    Panel {{ auth::user()->role }}
+                    Panel {{ Auth::user()->role }}
                 </div>
                 <div>
                     <form action="{{ route('logout') }}" method="POST">
