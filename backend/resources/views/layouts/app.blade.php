@@ -1,3 +1,4 @@
+<!-- layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,22 +7,22 @@
     <title>Sistem Logistik - SiGap BPBD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-slate-50 font-sans antialiased text-gray-800 flex h-screen overflow-hidden">
 
-    <!-- 1. PANGGIL SIDEBAR DISINI -->
+<body x-data="{ sidebarOpen: true }" class="bg-slate-50 font-sans antialiased text-gray-800 flex h-screen overflow-hidden">
+
+    <!-- 1. SIDEBAR -->
     @include('layouts.sidebar')
 
     <!-- 2. CONTAINER KONTEN UTAMA -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        <!-- Top Navbar (Profil Petugas & Hamburger) -->
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-30 shrink-0">
-            <button class="p-2 text-gray-500 hover:text-gray-700 rounded-lg focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
+        <!-- 3. NAVBAR -->
+        @include('layouts.navbar')
 
             <!-- Profil User Kanan Atas -->
             <div class="flex items-center gap-3">
@@ -35,8 +36,8 @@
             </div>
         </header>
 
-        <!-- Area Isi Konten (Dashboard, Tabel, dll) -->
-        <main class="flex-1 overflow-y-auto p-8 bg-[#f8fafc] -mt-4">
+        <!-- 4. AREA KONTEN HALAMAN -->
+        <main class="flex-1 overflow-y-auto p-8 bg-[#f8fafc]">e
             @yield('content')
         </main>
     </div>
