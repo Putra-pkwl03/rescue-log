@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Peran akun
-            $table->enum('role', ['admin', 'koordinator_komando', 'petugas_lapangan'])
-                  ->default('petugas_lapangan')
+            $table->enum('role', ['admin', 'komando', 'lapangan'])
+                  ->default('lapangan')
                   ->after('email');
+            $table->foreignId('bpbd_id')->nullable()->constrained('bpbd')->onDelete('cascade');
             
             // Relasi ke Posko tempat petugas bertugas
             $table->foreignId('posko_id')
@@ -34,6 +35,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['posko_id']);
             $table->dropColumn(['role', 'posko_id']);
+            $table->dropForeign(['bpbd_id']);
+            $table->dropColumn('bpbd_id');
         });
     }
 };

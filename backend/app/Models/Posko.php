@@ -9,30 +9,49 @@ class Posko extends Model
 {
     use HasFactory;
 
+    protected $table = 'poskos';
+
     protected $fillable = [
         'nama_posko',
         'tipe_posko',
         'parent_id',
+        'bpbd_id',
+        'bencana_id',
+        'kode_undangan',
         'lokasi',
+        'latitude',
+        'longitude',
         'kapasitas_maksimal',
         'penanggung_jawab',
         'kontak_hp',
         'status',
     ];
 
-    // Relasi: Posko Kecil punya 1 Posko Komando (Induk)
+    // Relasi: Posko Komando terikat pada 1 BPBD
+    public function bpbd()
+    {
+        return $this->belongsTo(Bpbd::class, 'bpbd_id');
+    }
+
+    // Relasi: Posko Lapangan Kecil terikat pada 1 Kejadian Bencana
+    public function bencana()
+    {
+        return $this->belongsTo(Bencana::class, 'bencana_id');
+    }
+
+    // Relasi Self-Referencing: Posko Kecil merujuk ke 1 Posko Komando
     public function parent()
     {
         return $this->belongsTo(Posko::class, 'parent_id');
     }
 
-    // Relasi: Posko Komando punya banyak Posko Kecil (Anak)
+    // Relasi Self-Referencing: Posko Komando menaungi banyak Posko Kecil
     public function children()
     {
         return $this->hasMany(Posko::class, 'parent_id');
     }
 
-    // Relasi: Posko punya banyak Petugas (Users)
+    // Relasi: Posko menampung banyak Petugas/User
     public function users()
     {
         return $this->hasMany(User::class);

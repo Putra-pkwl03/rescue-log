@@ -14,8 +14,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',      // Tambahan
-        'posko_id',  // Tambahan
+        'role',  
+        'posko_id',
+        'bpbd_id',
     ];
 
     protected $hidden = [
@@ -35,5 +36,10 @@ class User extends Authenticatable
     public function posko()
     {
         return $this->belongsTo(Posko::class);
+    }
+
+    public function bpbd()
+    {
+        return $this->belongsTo(Bpbd::class);
     }
 }

@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">Dashboard Utama</h1>
-    <p class="text-gray-600 mt-2">Selamat datang, <strong>{{ auth::user()->name }}</strong>. Berikut adalah ringkasan informasi operasional BPBD terkini.</p>
+    <p class="text-gray-600 mt-2">Selamat datang, <strong>{{ auth()->user()->name }}</strong>. Berikut adalah ringkasan informasi operasional BPBD terkini.</p>
 </div>
 
 <!-- Statistik Utama -->
@@ -51,6 +51,35 @@
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
         </div>
     </div>
+</div>
+
+<div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-8">
+    @if(!$posko)
+        <p class="text-gray-500 mb-3">⚠ Belum ada Posko Komando</p>
+        <a href="{{ route('admin.posko.create') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded">
+            Daftarkan Posko Komando
+        </a>
+    @else
+        <h3 class="font-semibold text-lg text-gray-800">{{ $posko->nama_posko }}</h3>
+        <p class="text-sm text-gray-500 mt-1">
+            Status:
+            <span class="{{ $posko->status === 'aktif' ? 'text-green-600' : 'text-gray-500' }} font-medium">
+                ● {{ $posko->status === 'aktif' ? 'Aktif' : 'Nonaktif' }}
+            </span>
+        </p>
+
+        @if($posko->status === 'terdaftar_nonaktif')
+            <a href="{{ route('admin.bencana.aktifkan.form') }}" class="mt-3 inline-block bg-green-600 text-white px-4 py-2 rounded">
+                Aktifkan Posko
+            </a>
+        @elseif($bencanaAktif)
+            <p class="text-sm mt-2 text-gray-700">Menangani: {{ $bencanaAktif->jenis_bencana }}</p>
+            <form action="{{ route('admin.bencana.nonaktifkan') }}" method="POST" class="mt-3">
+                @csrf
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Nonaktifkan Posko</button>
+            </form>
+        @endif
+    @endif
 </div>
 
 <!-- Area Informasi Cepat -->
