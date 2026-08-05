@@ -17,6 +17,7 @@ class User extends Authenticatable
         'role',  
         'posko_id',
         'bpbd_id',
+        'kode_sub_posko',
     ];
 
     protected $hidden = [

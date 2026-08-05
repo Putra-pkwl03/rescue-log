@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Komando;
+use App\Http\Controllers\Lapangan; // <-- 1. Tambahkan ini di bagian atas
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +66,7 @@ Route::middleware('auth')->group(function () {
 
     // ============ LAPANGAN (Posko Kecil) ============
     Route::middleware('role:lapangan')->prefix('lapangan')->name('lapangan.')->group(function () {
-        Route::get('/dashboard', fn() => view('dashboard.lapangan.index'))->name('dashboard');
+        // 2. Ubah baris ini agar mengarah ke Controller yang ada di folder Lapangan
+        Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
     });
 });
