@@ -3,15 +3,15 @@
 @section('content')
     <!-- Teks Selamat Datang (Tanpa Card & Tanpa Tombol) -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Selamat Datang di Posko Lapangan 👋</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Selamat Datang di Posko Lapangan</h1>
         <p class="text-gray-600 text-sm mt-1">Pantau lokasi kejadian, dokumentasi, dan status bantuan terkini.</p>
     </div>
 
     <!-- 4 Card Statistik di Atas -->
-    @include('components.sub-posko.stats-cards')
+    @include('components.sub-posko.navbarlp.stats-cards')
 
     <!-- 4 Card Menu Interaktif di Bawah -->
-    @include('components.sub-posko.action-cards')
+    @include('components.sub-posko.navbarlp.action-cards')
 
     <div class="lg:col-span-2 space-y-6">
         @if (view()->exists('components.sub-posko.detail.hero-card'))
