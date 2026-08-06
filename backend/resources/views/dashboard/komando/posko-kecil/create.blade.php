@@ -3,7 +3,7 @@
 @section('title', 'Tambah Posko Kecil - SiGap BPBD')
 
 @section('content')
-<div class="mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
     
     {{-- Header Section --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
@@ -119,7 +119,7 @@
 
                 {{-- Blade Component Map --}}
                 <div class="rounded-xl overflow-hidden border border-slate-200">
-                    <x-sub-posko.maps.picker height="380px" :auto-detect="true" />
+                    <x-sub-posko.maps.picker height="380px" />
                 </div>
 
                 {{-- Action Buttons --}}
