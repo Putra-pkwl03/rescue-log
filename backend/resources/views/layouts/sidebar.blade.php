@@ -31,7 +31,6 @@
 
     <!-- Area Navigasi Utama -->
     <div class="p-4 flex-1 overflow-y-auto">
-        <p x-show="sidebarOpen" class="text-[11px] font-bold text-indigo-300/40 uppercase tracking-widest px-3 mb-3 whitespace-nowrap">MENU UTAMA</p>
 
         <nav class="space-y-1.5">
             {{-- MENU ADMIN --}}

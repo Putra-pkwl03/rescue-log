@@ -14,31 +14,35 @@ class UserSeeder extends Seeder
     {
         $bpbd = Bpbd::first();
         $poskoKomando = Posko::where('tipe_posko', 'komando')->first();
-        $poskoKecil = Posko::where('tipe_posko', 'lapangan_kecil')->first();
 
+        // Admin Utama BPBD
         User::create([
-            'name' => 'Admin BPBD Utama',
-            'email' => 'admin@bpbd.go.id',
+            'name'     => 'Admin BPBD Utama',
+            'email'    => 'admin@bpbd.go.id',
             'password' => Hash::make('password123'),
-            'role' => 'admin',
+            'role'     => 'admin',
             'posko_id' => null,
-            'bpbd_id' => $bpbd?->id,
+            'bpbd_id'  => $bpbd?->id,
         ]);
 
+        // Koordinator Komando Utama
         User::create([
-            'name' => 'Koordinator Komando',
-            'email' => 'komando@rescuelog.com',
+            'name'     => 'Koordinator Komando',
+            'email'    => 'komando@rescuelog.com',
             'password' => Hash::make('password123'),
-            'role' => 'komando',
+            'role'     => 'komando',
             'posko_id' => $poskoKomando?->id,
+            'bpbd_id'  => $bpbd?->id,
         ]);
 
+        // Petugas Lapangan Standby (Posko dihubungkan nanti setelah Sub-Posko dibuat)
         User::create([
-            'name' => 'Petugas Lapangan A',
-            'email' => 'petugas@rescuelog.com',
+            'name'     => 'Petugas Lapangan A',
+            'email'    => 'petugas@rescuelog.com',
             'password' => Hash::make('password123'),
-            'role' => 'lapangan',
-            'posko_id' => $poskoKecil?->id,
+            'role'     => 'lapangan',
+            'posko_id' => null, 
+            'bpbd_id'  => $bpbd?->id,
         ]);
     }
 }

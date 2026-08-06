@@ -40,4 +40,11 @@ class PoskoController extends Controller
 
         return redirect()->route('admin.dashboard')->with('success', 'Posko Komando berhasil didaftarkan.');
     }
+
+    public function aktifkan(Posko $posko)
+    {
+        $posko->update(['status' => 'aktif']);
+
+        return redirect()->back()->with('success', 'Posko berhasil diaktifkan.');
+    }
 }

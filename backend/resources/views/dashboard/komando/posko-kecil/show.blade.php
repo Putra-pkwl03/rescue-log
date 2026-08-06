@@ -3,7 +3,7 @@
 @section('title', 'Detail Posko Kecil - SiGap BPBD')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6 pb-12">
+<div class="max-w-7xl mx-auto space-y-6 pb-12" x-data="{ activeTab: 'informasi' }">
 
     {{-- Alert --}}
     <x-sub-posko.alert />
@@ -21,16 +21,46 @@
 
         {{-- LEFT COLUMN --}}
         <div class="lg:col-span-8 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <x-sub-posko.detail.info-general :subPosko="$subPosko" />
-                <x-sub-posko.detail.info-summary :subPosko="$subPosko" />
+
+            {{-- TAB: Informasi --}}
+            <div x-show="activeTab === 'informasi'" x-cloak class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <x-sub-posko.detail.info-general :subPosko="$subPosko" />
+                    <x-sub-posko.detail.info-summary :subPosko="$subPosko" />
+                </div>
+                <x-sub-posko.detail.user-table :users="$subPosko->users" />
             </div>
 
-            <x-sub-posko.detail.user-table :users="$subPosko->users" />
+            {{-- TAB: Logistik --}}
+            <div x-show="activeTab === 'logistik'" x-cloak>
+                <x-sub-posko.detail.logistik-card :subPosko="$subPosko" />
+            </div>
+
+            {{-- TAB: Distribusi --}}
+            <div x-show="activeTab === 'distribusi'" x-cloak>
+                <x-sub-posko.detail.placeholder-tab
+                    title="Distribusi"
+                    message="Data distribusi logistik untuk posko ini belum tersedia." />
+            </div>
+
+            {{-- TAB: Permintaan --}}
+            <div x-show="activeTab === 'permintaan'" x-cloak>
+                <x-sub-posko.detail.placeholder-tab
+                    title="Permintaan"
+                    message="Belum ada pengajuan permintaan logistik dari posko ini." />
+            </div>
+
+            {{-- TAB: Riwayat Aktivitas --}}
+            <div x-show="activeTab === 'riwayat'" x-cloak>
+                <x-sub-posko.detail.placeholder-tab
+                    title="Riwayat Aktivitas"
+                    message="Belum ada riwayat aktivitas yang tercatat." />
+            </div>
+
         </div>
 
         {{-- RIGHT SIDEBAR --}}
-        <div class="lg:col-span-4 space-y-6">
+        <div class="lg:col-span-4 space-y-6" x-show="activeTab === 'informasi'" x-cloak>
             <x-sub-posko.detail.mini-map :subPosko="$subPosko" />
             <x-sub-posko.detail.documentation :subPosko="$subPosko" />
         </div>
@@ -42,7 +72,6 @@
 @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* CSS agar Peta Memenuhi Layar secara Sempurna saat Fullscreen */
         #mapWrapper:fullscreen {
             width: 100vw !important;
             height: 100vh !important;
@@ -65,26 +94,22 @@
             const lat = {{ $subPosko->latitude ?? -7.7956 }};
             const lng = {{ $subPosko->longitude ?? 110.3695 }};
 
-            // Layer 1: Peta Jalan (OpenStreetMap)
             const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap'
             });
 
-            // Layer 2: Peta Satelit (Esri World Imagery)
             const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 19,
                 attribution: 'Tiles &copy; Esri'
             });
 
-            // Inisialisasi Peta
             mapInstance = L.map('miniMap', {
                 center: [lat, lng],
                 zoom: 13,
                 layers: [osm]
             });
 
-            // Pilihan Control Layer
             const baseMaps = {
                 "Peta Jalan": osm,
                 "Satelit": satellite
@@ -92,7 +117,6 @@
 
             L.control.layers(baseMaps).addTo(mapInstance);
 
-            // Marker Posko
             @if($subPosko->latitude && $subPosko->longitude)
                 L.marker([lat, lng])
                     .addTo(mapInstance)
@@ -106,7 +130,6 @@
             @endif
         });
 
-        // Event handler saat toggle fullscreen (memaksa Leaflet menggambar ulang ubin peta)
         document.addEventListener('fullscreenchange', function () {
             if (mapInstance) {
                 setTimeout(() => {
