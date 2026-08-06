@@ -3,183 +3,148 @@
 @section('title', 'Edit Posko Kecil - SiGap BPBD')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-6 pb-12">
-
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Edit Posko Kecil</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Perbarui informasi dan lokasi posko lapangan.</p>
+<div class="mx-auto space-y-6">
+    
+    {{-- Header Section --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                    Posko Lapangan
+                </span>
+                <span class="text-xs text-slate-400">&bull;</span>
+                <span class="text-xs font-medium text-slate-500">Edit Data</span>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Edit Sub-Posko Kecil</h1>
+            <p class="text-xs text-slate-500">Perbarui informasi operasional posko dan penyesuaian titik koordinat presisi pada peta.</p>
         </div>
-        <div class="flex items-center gap-2.5">
-            <a href="{{ route('komando.posko-kecil.show', $subPosko->id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-sm transition">
+        <div>
+            <a href="{{ route('komando.posko-kecil.show', $subPosko->id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Kembali
+                Kembali ke Detail
             </a>
         </div>
     </div>
 
-    {{-- Form Edit --}}
-    <form action="{{ route('komando.posko-kecil.update', $subPosko->id) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
+    {{-- Form Utama --}}
+    <form action="{{ route('komando.posko-kecil.update', $subPosko->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
-        {{-- Section 1: Informasi Utama --}}
-        <div>
-            <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4">Informasi Utama Posko</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- Hidden Input Kejadian Bencana --}}
+        <input type="hidden" name="bencana_id" value="{{ old('bencana_id', $subPosko->bencana_id ?? 1) }}">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {{-- KOLOM KIRI: Data Operasional & Kontak --}}
+            <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
                 
-                {{-- Nama Posko --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Posko <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_posko" value="{{ old('nama_posko', $subPosko->nama_posko) }}" required placeholder="Contoh: Posko Lapangan Kebonagung"
-                           class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('nama_posko') border-rose-500 @enderror">
-                    @error('nama_posko') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-base font-bold text-slate-900">Detail Informasi Posko</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Informasi identitas dan penanggung jawab lapangan</p>
                 </div>
 
-                {{-- Bencana Terkait --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Bencana Terkait <span class="text-rose-500">*</span></label>
-                    <select name="bencana_id" required class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('bencana_id') border-rose-500 @enderror">
-                        <option value="">-- Pilih Bencana --</option>
-                        @foreach($bencanaAktif as $bencana)
-                            <option value="{{ $bencana->id }}" {{ old('bencana_id', $subPosko->bencana_id) == $bencana->id ? 'selected' : '' }}>
-                                {{ $bencana->jenis_bencana }} - {{ $bencana->lokasi ?? 'Umum' }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('bencana_id') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
+                <div class="space-y-4">
+                    {{-- Nama Posko & Jumlah Petugas --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Nama Posko <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="nama_posko" value="{{ old('nama_posko', $subPosko->nama_posko) }}" placeholder="Contoh: Posko Lapangan A" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
+                            @error('nama_posko') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
+                        </div>
 
-                {{-- Penanggung Jawab --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Penanggung Jawab <span class="text-rose-500">*</span></label>
-                    <input type="text" name="penanggung_jawab" value="{{ old('penanggung_jawab', $subPosko->penanggung_jawab) }}" required placeholder="Nama Lengkap PJ"
-                           class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('penanggung_jawab') border-rose-500 @enderror">
-                    @error('penanggung_jawab') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
-
-                {{-- Kontak HP --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">No. WhatsApp / HP</label>
-                    <input type="text" name="kontak_hp" value="{{ old('kontak_hp', $subPosko->kontak_hp) }}" placeholder="08xxxxxxxxxx"
-                           class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('kontak_hp') border-rose-500 @enderror">
-                    @error('kontak_hp') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
-
-                {{-- Jumlah Petugas --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Jumlah Petugas (Estimasi)</label>
-                    <input type="number" min="0" name="jumlah_petugas" value="{{ old('jumlah_petugas', $subPosko->jumlah_petugas) }}" placeholder="0"
-                           class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('jumlah_petugas') border-rose-500 @enderror">
-                    @error('jumlah_petugas') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
-
-                {{-- Upload Foto Posko --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Foto Posko (Opsional)</label>
-                    <div class="flex items-center gap-3">
-                        @if($subPosko->foto)
-                            <img src="{{ asset('storage/' . $subPosko->foto) }}" alt="Preview Foto" class="w-10 h-10 object-cover rounded-lg border border-slate-200">
-                        @endif
-                        <input type="file" name="foto" accept="image/*"
-                               class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Jumlah Petugas
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="jumlah_petugas" value="{{ old('jumlah_petugas', $subPosko->jumlah_petugas) }}" placeholder="10" class="w-full pr-3.5 pl-9 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            @error('jumlah_petugas') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
+                        </div>
                     </div>
-                    @error('foto') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-        </div>
 
-        {{-- Section 2: Lokasi & Koordinat --}}
-        <div>
-            <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4">Lokasi & Pemetaan</h3>
-            <div class="space-y-4">
-                {{-- Alamat / Deskripsi Lokasi --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Alamat / Deskripsi Lokasi</label>
-                    <textarea name="lokasi" rows="2" placeholder="Jl. Raya Kebonagung No. 12, RT 02/RW 05..."
-                              class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 @error('lokasi') border-rose-500 @enderror">{{ old('lokasi', $subPosko->lokasi) }}</textarea>
-                    @error('lokasi') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
-                </div>
+                    {{-- Penanggung Jawab & HP --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Penanggung Jawab <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="penanggung_jawab" value="{{ old('penanggung_jawab', $subPosko->penanggung_jawab) }}" placeholder="Nama Koordinator" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
+                            @error('penanggung_jawab') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
+                        </div>
 
-                {{-- Map Picker --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Klik Peta untuk Mengubah Koordinat</label>
-                    <div id="mapPicker" class="h-64 rounded-xl border border-slate-200 overflow-hidden z-0 mb-3"></div>
-                </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                No. WhatsApp/HP
+                            </label>
+                            <input type="text" name="kontak_hp" value="{{ old('kontak_hp', $subPosko->kontak_hp) }}" placeholder="08xxxxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
+                            @error('kontak_hp') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
 
-                {{-- Input Latitude & Longitude --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Blade Component Upload Foto --}}
+                    <x-sub-posko.image-picker name="foto" label="Foto Dokumentasi Posko" :value="$subPosko->foto" />
+
+                    {{-- Alamat / Detail Lokasi --}}
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Latitude</label>
-                        <input type="text" id="latitude" name="latitude" value="{{ old('latitude', $subPosko->latitude) }}" readonly placeholder="-7.xxxxxx"
-                               class="w-full text-xs bg-slate-50 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('latitude') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Alamat / Patokan Lokasi
+                        </label>
+                        <textarea name="lokasi" rows="3" placeholder="Nama dusun, RT/RW, atau patokan lokasi terdekat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all resize-none">{{ old('lokasi', $subPosko->lokasi) }}</textarea>
+                        @error('lokasi') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
                     </div>
+
+                </div>
+
+            </div>
+
+            {{-- KOLOM KANAN: Peta Interactive Marker --}}
+            <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
+                
+                <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Longitude</label>
-                        <input type="text" id="longitude" name="longitude" value="{{ old('longitude', $subPosko->longitude) }}" readonly placeholder="110.xxxxxx"
-                               class="w-full text-xs bg-slate-50 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('longitude') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                        <h2 class="text-base font-bold text-slate-900">Titik Koordinat Lokasi</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Tentukan posisi geografis posko pada peta bawah ini</p>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        {{-- Submit Buttons --}}
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <a href="{{ route('komando.posko-kecil.show', $subPosko->id) }}" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">
-                Batal
-            </a>
-            <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
-                Simpan Perubahan
-            </button>
+                {{-- Blade Component Map dengan nilai tersimpan & autoDetect disabled --}}
+                <div class="rounded-xl overflow-hidden border border-slate-200">
+                    <x-sub-posko.maps.picker 
+                        height="380px" 
+                        :lat-value="old('latitude', $subPosko->latitude)" 
+                        :lng-value="old('longitude', $subPosko->longitude)" 
+                        :auto-detect="false"
+                    />
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
+                    <a href="{{ route('komando.posko-kecil.show', $subPosko->id) }}" class="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                        Batal
+                    </a>
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-indigo-200 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Simpan Perubahan
+                    </button>
+                </div>
+
+            </div>
+
         </div>
     </form>
 </div>
 @endsection
-
-@push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endpush
-
-@push('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const defaultLat = {{ $subPosko->latitude ?? -7.7956 }};
-            const defaultLng = {{ $subPosko->longitude ?? 110.3695 }};
-
-            const map = L.map('mapPicker').setView([defaultLat, defaultLng], 14);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
-
-            let marker;
-
-            // Jika latitude & longitude awal ada, pasang marker
-            @if($subPosko->latitude && $subPosko->longitude)
-                marker = L.marker([defaultLat, defaultLng]).addTo(map);
-            @endif
-
-            // Klik peta untuk memilih lokasi baru
-            map.on('click', function (e) {
-                const lat = e.latlng.lat.toFixed(6);
-                const lng = e.latlng.lng.toFixed(6);
-
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
-
-                if (marker) {
-                    marker.setLatLng(e.latlng);
-                } else {
-                    marker = L.marker(e.latlng).addTo(map);
-                }
-            });
-        });
-    </script>
-@endpush
