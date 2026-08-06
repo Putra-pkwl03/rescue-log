@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,13 +17,43 @@ class AuthController extends Controller
     // 2. Memproses Autentikasi Login
     public function login(Request $request)
     {
-        // Validasi input
+        // ==========================================
+        // A. JIKA LOGIN MENGGUNAKAN KODE SUB POSKO
+        // ==========================================
+        if ($request->filled('kode_sub_posko')) {
+            // Validasi input kode
+            $request->validate([
+                'kode_sub_posko' => ['required', 'string'],
+            ]);
+
+            // Cari user dengan role 'lapangan' yang memiliki kode_sub_posko sesuai
+            $user = User::where('kode_sub_posko', $request->kode_sub_posko)
+                        ->where('role', 'lapangan')
+                        ->first();
+
+            // Jika user ditemukan, langsung loginkan
+            if ($user) {
+                Auth::login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
+
+                return redirect()->route('lapangan.dashboard');
+            }
+
+            // Jika kode sub posko salah / tidak ditemukan
+            return back()->withErrors([
+                'kode_sub_posko' => 'Kode Sub Posko tidak valid atau tidak ditemukan.',
+            ])->onlyInput('kode_sub_posko');
+        }
+
+        // ==========================================
+        // B. JIKA LOGIN MENGGUNAKAN EMAIL & PASSWORD
+        // ==========================================
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Cek kredensial
+        // Cek kredensial email & password
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
@@ -39,7 +70,7 @@ class AuthController extends Controller
             };
         }
 
-        // Jika login gagal
+        // Jika login email/password gagal
         return back()->withErrors([
             'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');

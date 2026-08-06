@@ -3,7 +3,7 @@
 @section('title', 'Detail Posko Kecil - SiGap BPBD')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6 pb-12" x-data="{ activeTab: 'informasi' }">
+<div class="mx-auto space-y-6">
 
     {{-- Alert --}}
     <x-sub-posko.alert />

@@ -3,7 +3,8 @@
 @section('title', 'Login - Sistem Penanganan Bencana BPBD')
 
 @section('content')
-<div class="min-h-screen w-full flex flex-col md:flex-row">
+<!-- Dikunci dengan md:h-screen dan md:overflow-hidden untuk mencegah scrollbar saat berganti tab -->
+<div class="min-h-screen md:h-screen w-full flex flex-col md:flex-row overflow-x-hidden md:overflow-hidden">
     
     <!-- SISI KIRI: Hero Section (Biru Navy + Overlay + Informasi BPBD) -->
     <div class="hidden md:flex md:w-1/2 lg:w-7/12 relative bg-slate-900 justify-between flex-col p-12 overflow-hidden">
@@ -75,8 +76,9 @@
     </div>
 
     <!-- SISI KANAN: Form Login -->
-    <div class="w-full md:w-1/2 lg:w-5/12 bg-slate-50 flex items-center justify-center p-6 lg:p-12">
-        <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+    <div class="w-full md:w-1/2 lg:w-5/12 bg-slate-50 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
+        <!-- Inisialisasi Alpine.js: Otomatis ke tab Sub Posko jika ada input / error kode_sub_posko -->
+        <div x-data="{ isSubPosko: {{ old('kode_sub_posko') || $errors->has('kode_sub_posko') ? 'true' : 'false' }} }" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100 my-auto">
             
             <!-- Header Form -->
             <div class="text-center mb-8">
@@ -84,7 +86,7 @@
                     <i data-lucide="lock" class="w-6 h-6"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-slate-900">Selamat Datang</h3>
-                <p class="text-slate-500 text-sm mt-1">Silakan masuk untuk mengakses RESCUE-LOG</p>
+                <p class="text-slate-500 text-sm mt-1" x-text="isSubPosko ? 'Masukkan kode sub posko untuk mengakses RESCUE-LOG' : 'Silakan masuk untuk mengakses RESCUE-LOG'"></p>
             </div>
 
             <!-- Alert Notifikasi -->
@@ -106,34 +108,50 @@
             <form action="{{ route('login') }}" method="POST" class="space-y-5">
                 @csrf
 
-                <!-- Input Email -->
-                <div>
+                <!-- Input Email (HANYA tampil saat mode Posko Komando) -->
+                <div x-show="!isSubPosko" x-cloak>
                     <label for="email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Username / Email</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </div>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" 
+                            :required="!isSubPosko" :disabled="isSubPosko" autofocus
                             class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition"
                             placeholder="Masukkan email petugas">
                     </div>
                 </div>
 
-                <!-- Input Password -->
-                <div>
+                <!-- Input Password (HANYA tampil saat mode Posko Komando) -->
+                <div x-show="!isSubPosko" x-cloak>
                     <label for="password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Password</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i data-lucide="key-round" class="w-5 h-5"></i>
                         </div>
-                        <input type="password" name="password" id="password" required
+                        <input type="password" name="password" id="password" 
+                            :required="!isSubPosko" :disabled="isSubPosko"
                             class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition"
                             placeholder="Masukkan password">
                     </div>
                 </div>
 
-                <!-- Remember Me & Forgot Pass -->
-                <div class="flex items-center justify-between text-sm">
+                <!-- Input Kode Sub Posko (HANYA tampil saat mode Sub Posko) -->
+                <div x-show="isSubPosko" class="space-y-2" x-cloak>
+                    <label for="kode_sub_posko" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Kode Sub Posko</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="qr-code" class="w-5 h-5"></i>
+                        </div>
+                        <input type="text" name="kode_sub_posko" id="kode_sub_posko" value="{{ old('kode_sub_posko') }}"
+                            :required="isSubPosko" :disabled="!isSubPosko"
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition"
+                            placeholder="Masukkan kode sub posko (contoh: PSK-5JIQN)">
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Pass (HANYA tampil saat mode Posko Komando) -->
+                <div x-show="!isSubPosko" class="flex items-center justify-between text-sm" x-cloak>
                     <label class="flex items-center text-slate-600 cursor-pointer">
                         <input type="checkbox" name="remember" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
                         <span class="ml-2 text-xs font-medium">Ingat saya</span>
@@ -149,29 +167,35 @@
                 </button>
             </form>
 
-            <!-- Divider / Pilihan Role Akses -->
+            <!-- Divider -->
             <div class="relative my-6 text-center">
                 <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
-                <span class="relative bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">Akses Role Sistem</span>
+                <span class="relative bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">Tipe Akses Posko</span>
             </div>
 
-            <!-- Shortcut Card Role BPBD -->
+            <!-- Card Pilihan Posko -->
             <div class="grid grid-cols-2 gap-3">
-                <div class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-xl text-center">
+                <!-- Posko Komando Button -->
+                <button type="button" @click="isSubPosko = false"
+                    :class="!isSubPosko ? 'ring-2 ring-amber-500 bg-amber-100/70 border-amber-300' : 'bg-amber-50/60 border-amber-200/80'"
+                    class="p-3 border rounded-xl text-center cursor-pointer transition-all duration-200 focus:outline-none">
                     <div class="w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
                         <i data-lucide="building-2" class="w-4 h-4"></i>
                     </div>
-                    <span class="block text-xs font-bold text-amber-900">Posko Komando</span>
+                    <span class="block text-xs font-bold text-amber-900">Posko Komando & Admin BPBD</span>
                     <span class="block text-[10px] text-amber-700 mt-0.5">Akses Induk BPBD</span>
-                </div>
+                </button>
 
-                <div class="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-xl text-center">
+                <!-- Sub Posko Button -->
+                <button type="button" @click="isSubPosko = true"
+                    :class="isSubPosko ? 'ring-2 ring-emerald-500 bg-emerald-100/70 border-emerald-300' : 'bg-emerald-50/60 border-emerald-200/80'"
+                    class="p-3 border rounded-xl text-center cursor-pointer transition-all duration-200 focus:outline-none">
                     <div class="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
                         <i data-lucide="tent" class="w-4 h-4"></i>
                     </div>
-                    <span class="block text-xs font-bold text-emerald-900">Posko Kecil</span>
+                    <span class="block text-xs font-bold text-emerald-900">Sub Posko</span>
                     <span class="block text-[10px] text-emerald-700 mt-0.5">Akses Lapangan</span>
-                </div>
+                </button>
             </div>
 
         </div>

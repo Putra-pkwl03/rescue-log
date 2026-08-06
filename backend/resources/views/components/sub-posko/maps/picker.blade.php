@@ -3,6 +3,7 @@
     'lngInputId' => 'longitude',
     'latValue' => old('latitude'),
     'lngValue' => old('longitude'),
+    'autoDetect' => false,
     'height' => '380px'
 ])
 
@@ -38,7 +39,6 @@
 </div>
 
 @push('styles')
-    {{-- Leaflet CSS & Fullscreen Plugin CSS --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen@1.0.2/dist/leaflet.fullscreen.css" />
     <style>
@@ -48,7 +48,6 @@
 @endpush
 
 @push('scripts')
-    {{-- Leaflet JS & Fullscreen Plugin JS --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-fullscreen@1.0.2/dist/Leaflet.fullscreen.min.js"></script>
 
@@ -61,7 +60,7 @@
             let initialLat = parseFloat(latInput.value) || -7.7956;
             let initialLng = parseFloat(lngInput.value) || 110.3695;
 
-            // 1. Definisikan Multi Layer
+            // 1. Layer Peta
             const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap'
@@ -72,23 +71,23 @@
                 attribution: 'Tiles &copy; Esri'
             });
 
-            // 2. Inisialisasi Peta dengan Fitur Fullscreen
+            // 2. Inisialisasi Peta
             const map = L.map('map', {
                 center: [initialLat, initialLng],
-                zoom: 14,
+                zoom: 15,
                 layers: [osmStreet],
                 fullscreenControl: true, 
                 fullscreenControlOptions: { position: 'topleft' }
             });
 
-            // 3. Tambahkan Toggle Pengontrol Layer
+            // 3. Toggle Layer
             const baseMaps = {
                 "Peta Jalan": osmStreet,
                 "Satelit": esriSatellite
             };
             L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-            // 4. Tambahkan Marker Draggable
+            // 4. Marker Draggable
             let marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
 
             function updateInputs(lat, lng) {
@@ -96,7 +95,6 @@
                 lngInput.value = lng.toFixed(6);
             }
 
-            // Event Klik & Drag Marker
             map.on('click', function (e) {
                 marker.setLatLng(e.latlng);
                 updateInputs(e.latlng.lat, e.latlng.lng);
@@ -107,7 +105,6 @@
                 updateInputs(pos.lat, pos.lng);
             });
 
-            // Sync Manual Input ke Marker
             function updateFromInputs() {
                 const lat = parseFloat(latInput.value);
                 const lng = parseFloat(lngInput.value);
@@ -119,7 +116,7 @@
             latInput.addEventListener('change', updateFromInputs);
             lngInput.addEventListener('change', updateFromInputs);
 
-            // 5. Fungsi Deteksi Geolocation Otomatis
+            // 5. Geolocation Handler
             function autoDetectLocation(isInitial = false) {
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(
@@ -132,7 +129,7 @@
                             updateInputs(lat, lng);
                         },
                         function (error) {
-                            if (!isInitial) alert("Gagal mendeteksi lokasi. Pastikan izin lokasi (GPS) di browser aktif.");
+                            if (!isInitial) alert("Gagal mendeteksi lokasi. Pastikan izin GPS di browser aktif.");
                         },
                         { enableHighAccuracy: true, timeout: 10000 }
                     );
@@ -141,12 +138,12 @@
                 }
             }
 
-            // Jalankan deteksi otomatis saat pertama kali dibuka jika belum ada old value
-            @if(!old('latitude'))
+            // Jalankan deteksi GPS otomatis HANYA jika diizinkan eksplisit (Create) dan tidak ada nilai lat/lng sebelumnya
+            @if($autoDetect && !$latValue)
                 autoDetectLocation(true);
             @endif
 
-            // Tombol Manual Trigger Deteksi Lokasi
+            // Tombol Manual Deteksi Lokasi (Selalu tersedia)
             btnAutoLocate.addEventListener('click', () => autoDetectLocation(false));
         });
     </script>
