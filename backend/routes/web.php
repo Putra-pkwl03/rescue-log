@@ -64,9 +64,24 @@ Route::middleware('auth')->group(function () {
        // Ubah ->names('sub-posko') menjadi ->names('posko-kecil')
         Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');    });
 
-    // ============ LAPANGAN (Posko Kecil) ============
+// ============ LAPANGAN (Posko Kecil) ============
     Route::middleware('role:lapangan')->prefix('lapangan')->name('lapangan.')->group(function () {
-        // 2. Ubah baris ini agar mengarah ke Controller yang ada di folder Lapangan
+        
+        // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
+
+        // Pengajuan Logistik
+        Route::resource('pengajuan', Lapangan\PengajuanController::class);
+
+        // Pendataan Pengungsi / KK
+        Route::resource('pengungsi', Lapangan\PengungsiController::class);
+
+        // Penyaluran & Pencatatan Stok
+        Route::resource('penyaluran', Lapangan\PenyaluranController::class);
+
+        // Status Distribusi & Stok
+        Route::get('/stok', [Lapangan\StokController::class, 'index'])->name('stok.index');
+        Route::post('/stok/konfirmasi/{id}', [Lapangan\StokController::class, 'konfirmasiSampai'])->name('stok.konfirmasi');
+
     });
 });
