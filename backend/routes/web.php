@@ -35,9 +35,21 @@ Route::middleware('auth')->group(function () {
 
     // ============ ADMIN (BPBD) ============
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        // Dashboard Admin
         Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Manajemen Posko Komando oleh Admin/BPBD
+        Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
+        Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
+        Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
+        Route::get('/posko/create', fn() => "Halaman pembuatan posko komando")->name('posko.create');
 
-        Route::get('/bencana', fn() => view('dashboard.admin.bencana.index'))->name('bencana');
+        // Manajemen Bencana
+        Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
+        Route::post('/bencana/validate/{pendingId}', [Admin\BencanaController::class, 'validateAndActivate'])->name('bencana.validate');
+        Route::post('/bencana/reject/{pendingId}', [Admin\BencanaController::class, 'rejectPending'])->name('bencana.reject');
+
+        // Menu Navigasi Admin Lainnya
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
         Route::get('/inventaris', fn() => view('dashboard.admin.inventaris.index'))->name('inventaris');
         Route::get('/distribusi', fn() => view('dashboard.admin.distribusi.index'))->name('distribusi');
@@ -60,8 +72,9 @@ Route::middleware('auth')->group(function () {
         // Pengajuan Kebutuhan
         Route::get('/pengajuan', fn() => view('dashboard.komando.pengajuan.index'))->name('pengajuan.index');
 
-       // Ubah ->names('sub-posko') menjadi ->names('posko-kecil')
-        Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');    });
+        // Kelola Posko Kecil / Sub-Posko
+        Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');
+    });
 
     // ============ LAPANGAN (Posko Kecil) ============
     Route::middleware('role:lapangan')->prefix('lapangan')->name('lapangan.')->group(function () {

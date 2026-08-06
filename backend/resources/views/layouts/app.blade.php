@@ -29,6 +29,43 @@
         </main>
     </div>
 
-@stack('scripts')
+    <!-- CDN SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Global Toast Notification (Kanan Atas) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Konfigurasi Mixin SweetAlert2 Toast di Kanan Atas
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end', 
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            // Trigger Notifikasi Sukses
+            @if(session('success'))
+                Toast.fire({
+                    icon: 'success',
+                    title: "{{ session('success') }}"
+                });
+            @endif
+
+            // Trigger Notifikasi Gagal / Error
+            @if(session('error'))
+                Toast.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}"
+                });
+            @endif
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 </html>
