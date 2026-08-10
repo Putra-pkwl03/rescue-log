@@ -2,12 +2,13 @@
 <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-30 shrink-0">
     <div class="flex items-center gap-4">
         <!-- TOMBOL STRIP 3 (HAMBURGER ICON) UNTUK TRIGGER SIDEBAR -->
-        <button @click="sidebarOpen = !sidebarOpen" 
-                type="button"
-                class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg focus:outline-none transition-colors"
-                aria-label="Toggle Sidebar">
-            <svg class="w-6 h-6" style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <button @click="sidebarOpen = !sidebarOpen" type="button"
+            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg focus:outline-none transition-colors cursor-pointer"
+            aria-label="Toggle Sidebar">
+            <svg class="w-6 h-6" style="width: 24px; height: 24px;" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
             </svg>
         </button>
 
@@ -16,14 +17,19 @@
 
     <!-- PROFIL USER KANAN ATAS -->
     <div class="relative" x-data="{ open: false }">
-        <button @click="open = !open" type="button" class="flex items-center gap-3 focus:outline-none">
-            <div class="w-9 h-9 rounded-full bg-sky-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+        <!-- Tombol Profil (Kursor otomatis jadi tangan karena ada cursor-pointer) -->
+        <button @click="open = !open" type="button" class="flex items-center gap-3 focus:outline-none cursor-pointer">
+            <div
+                class="w-9 h-9 rounded-full bg-sky-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
                 {{ strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
             </div>
             <div class="text-right hidden sm:block">
                 <p class="text-xs font-bold text-gray-800 leading-tight">{{ auth()->user()->name ?? 'User' }}</p>
-                <p class="text-[11px] text-gray-500 capitalize">{{ str_replace('_', ' ', auth()->user()->role ?? 'Role') }}</p>
+                <p class="text-[11px] text-gray-500 capitalize">
+                    {{ str_replace('_', ' ', auth()->user()->role ?? 'Role') }}
+                </p>
             </div>
+        <x-heroicon-o-chevron-down class="w-4 h-4 text-black transition-transform duration-200" x-bind:class="{ 'rotate-180': open }" />
         </button>
 
         <!-- Dropdown Menu -->
@@ -33,10 +39,11 @@
                 <p class="text-sm font-medium text-gray-800">{{ auth()->user()->name ?? 'User' }}</p>
                 <p class="text-xs text-gray-500">{{ auth()->user()->email ?? '' }}</p>
             </div>
-
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
+                <!-- Tombol Logout (Kursor jadi tangan) -->
+                <button type="submit"
+                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 cursor-pointer">
                     Keluar (Logout)
                 </button>
             </form>
