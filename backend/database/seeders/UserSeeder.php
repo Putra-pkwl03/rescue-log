@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         // Admin Utama BPBD
         User::create([
             'name'     => 'Admin BPBD Utama',
-            'email'    => 'admin@bpbd.go.id',
+            'email'    => 'admin@bpbd.com',
             'password' => Hash::make('password123'),
             'role'     => 'admin',
             'posko_id' => null,
