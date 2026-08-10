@@ -9,7 +9,8 @@
         "php": "^8.3",
         "blade-ui-kit/blade-heroicons": "^2.7",
         "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "owenvoke/blade-fontawesome": "^3.3"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7",

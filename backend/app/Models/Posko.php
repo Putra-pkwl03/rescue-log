@@ -87,4 +87,10 @@ class Posko extends Model
 
         return $kode;
     }
+
+    // Tambahkan di dalam class Posko
+    public function pengirimanInventaris()
+    {
+        return $this->hasMany(PengirimanInventaris::class, 'posko_id');
+    }
 }
