@@ -93,6 +93,7 @@ Route::middleware('auth')->group(function () {
 
         // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
+        Route::post('/dokumentasi/upload', [Lapangan\DashboardLapanganController::class, 'uploadFoto'])->name('dokumentasi.upload');
 
         // Pengajuan Logistik (Auto-predict ML diletakkan di index)
         Route::resource('pengajuan', Lapangan\PengajuanController::class);

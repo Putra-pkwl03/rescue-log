@@ -17,7 +17,7 @@ class PoskoSeeder extends Seeder
             ['alamat_kantor' => 'Jl. Merdeka No. 1, Sleman']
         );
 
-        // 2. Buat Posko Komando Utama (Kondisi Siaga / Standby)
+        // 2. Buat Posko Komando Utama
         $poskoKomando = Posko::create([
             'nama_posko'       => 'Posko Komando Sleman',
             'tipe_posko'       => 'komando',
@@ -28,7 +28,20 @@ class PoskoSeeder extends Seeder
             'status'           => 'terdaftar_nonaktif',
         ]);
 
-        // 3. Tambahkan Data Dummy Bencana Pending (tanpa kolom 'sumber')
+        // 3. TAMBAHKAN: Buat Posko Lapangan Kecil untuk Petugas Lapangan
+        $poskoLapangan = Posko::create([
+            'nama_posko'       => 'Posko Lapangan Sukamaju',
+            'tipe_posko'       => 'lapangan_kecil',
+            'bpbd_id'          => $bpbd->id,
+            'bencana_id'       => null,
+            'penanggung_jawab' => 'Petugas Lapangan A',
+            'lokasi'           => 'Kec. Sukamaju, Kab. Sleman',
+            'latitude'         => -7.7956,
+            'longitude'        => 110.3695,
+            'status'           => 'aktif',
+        ]);
+
+        // 4. Tambahkan Data Dummy Bencana Pending
         BencanaPending::create([
             'external_id'    => 'BMKG-TEST-001',
             'jenis_bencana'  => 'Gempabumi M 5.2',
