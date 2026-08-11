@@ -35,7 +35,6 @@ class PengungsiController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input dari form Blade
         $validated = $request->validate([
             'total_pengungsi'  => 'required|numeric|min:0',
             'balita'           => 'required|numeric|min:0',
@@ -47,18 +46,19 @@ class PengungsiController extends Controller
             'akses_air'        => 'required|string',
             'akses_jalan'      => 'required|string',
             'lama_pengungsian' => 'required|numeric|min:1',
+            'suhu_celcius'     => 'nullable|numeric',
+            'cuaca'            => 'nullable|string',
         ]);
 
-        // 2. Data Tambahan Otomatis
         $validated['user_id'] = Auth::id();
-        $validated['suhu_celcius'] = 28.5; // (Diambil manual sementara)
-        $validated['cuaca'] = 'Hujan Deras'; // (Diambil manual sementara)
+        
+        // Fallback jika kosong
+        $validated['suhu_celcius'] = $request->suhu_celcius ?? 28.5;
+        $validated['cuaca'] = $request->cuaca ?? 'Berawan';
 
-        // 3. Simpan sebagai data baru (Karena ini riwayat harian/berkala, gunakan create, BUKAN updateOrCreate)
         Pendataan::create($validated);
 
-        // 4. Redirect ke halaman Pengajuan (Yang otomatis menembak AI FastAPI)
         return redirect()->route('lapangan.pengajuan.index')
-            ->with('success', 'Data pendataan berhasil diperbarui! Berikut adalah estimasi kebutuhan logistik terbaru dari AI.');
+            ->with('success', 'Data pendataan & kondisi cuaca real-time berhasil disimpan. Menampilkan estimasi AI.');
     }
 }

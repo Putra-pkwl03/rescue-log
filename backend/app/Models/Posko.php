@@ -93,4 +93,9 @@ class Posko extends Model
     {
         return $this->hasMany(PengirimanInventaris::class, 'posko_id');
     }
+
+    public function fotos()
+    {
+        return $this->hasMany(PoskoFoto::class, 'posko_id');
+    }
 }

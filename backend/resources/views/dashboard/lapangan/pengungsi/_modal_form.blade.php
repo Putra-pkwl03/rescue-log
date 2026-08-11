@@ -34,8 +34,38 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 Tanggal Pendataan
                             </div>
-                            <div class="font-bold text-blue-900">{{ now()->format('d/m/Y H:i') }} WIB</div>
+                            <!-- Ubah dari PHP now() menjadi elemen ber-ID untuk diisi JavaScript -->
+                            <div id="waktu-realtime" class="font-bold text-blue-900">-</div>
                         </div>
+
+                        <!-- Kotak Informasi Suhu & Cuaca Real-time -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Suhu -->
+                            <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+                                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-500">Suhu Lokasi</div>
+                                    <div id="cuaca-suhu" class="text-sm font-bold text-blue-900">Memuat suhu...</div>
+                                </div>
+                            </div>
+
+                            <!-- Kondisi Cuaca -->
+                            <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+                                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-500">Kondisi Cuaca</div>
+                                    <div id="cuaca-kondisi" class="text-sm font-bold text-blue-900">Memuat cuaca...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Hidden agar Suhu & Cuaca ikut terkirim ke Controller saat form disubmit -->
+                        <input type="hidden" name="suhu_celcius" id="input-suhu">
+                        <input type="hidden" name="cuaca" id="input-cuaca">
 
                         <!-- 2. Rincian Kategori Khusus -->
                         <div>
@@ -125,6 +155,46 @@
 
 <script>
     function openPendataanModal() {
+        // 1. Set Tanggal Realtime (seperti sebelumnya)
+        const now = new Date();
+        const formatWaktu = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+        document.getElementById('waktu-realtime').innerText = formatWaktu;
+
+        // 2. Ambil Koordinat Posko dari PHP ($subPosko)
+        const lat = "{{ $subPosko->latitude ?? -7.7956 }}";
+        const lon = "{{ $subPosko->longitude ?? 110.3695 }}";
+
+        // 3. Request Data Cuaca Real-time (Contoh menggunakan API publik gratis: Open-Meteo)
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.current_weather) {
+                    const temp = data.current_weather.temperature; // Suhu dalam celcius
+                    const weatherCode = data.current_weather.weathercode;
+
+                    // Konversi sederhana kode cuaca open-meteo ke teks deskripsi
+                    let deskripsiCuaca = "Cerah / Berawan";
+                    if(weatherCode >= 51 && weatherCode <= 67) deskripsiCuaca = "Hujan Ringan/Sedang";
+                    if(weatherCode >= 80 && weatherCode <= 99) deskripsiCuaca = "Hujan Deras / Badai";
+
+                    // Tampilkan ke UI Modal
+                    document.getElementById('cuaca-suhu').innerText = temp + " °C";
+                    document.getElementById('cuaca-kondisi').innerText = deskripsiCuaca;
+
+                    // Masukkan ke input hidden agar tersimpan ke database saat disubmit
+                    document.getElementById('input-suhu').value = temp;
+                    document.getElementById('input-cuaca').value = deskripsiCuaca;
+                }
+            })
+            .catch(error => {
+                console.error('Gagal memuat data cuaca:', error);
+                document.getElementById('cuaca-suhu').innerText = "28.5 °C (Default)";
+                document.getElementById('cuaca-kondisi').innerText = "Berawan";
+                document.getElementById('input-suhu').value = 28.5;
+                document.getElementById('input-cuaca').value = "Berawan";
+            });
+
+        // 4. Animasi Buka Modal (Bawaan)
         const modal = document.getElementById('modal-pendataan');
         const backdrop = document.getElementById('modal-backdrop');
         const panel = document.getElementById('modal-panel');

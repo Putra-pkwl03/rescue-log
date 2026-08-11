@@ -94,6 +94,7 @@ Route::middleware('auth')->group(function () {
         // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
         Route::post('/dokumentasi/upload', [Lapangan\DashboardLapanganController::class, 'uploadFoto'])->name('dokumentasi.upload');
+        Route::delete('/dokumentasi/{id}', [Lapangan\DashboardLapanganController::class, 'hapusFoto'])->name('dokumentasi.hapus');
 
         // Pengajuan Logistik (Auto-predict ML diletakkan di index)
         Route::resource('pengajuan', Lapangan\PengajuanController::class);

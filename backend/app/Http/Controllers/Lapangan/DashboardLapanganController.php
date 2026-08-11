@@ -33,29 +33,42 @@ class DashboardLapanganController extends Controller
 public function uploadFoto(Request $request)
 {
     $request->validate([
-        'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'fotos' => 'required',
+        'fotos.*' => 'image|mimes:jpeg,png,jpg|max:2048', // Validasi tiap file dalam array
     ]);
 
-    // Mengambil posko milik user yang login
     $subPosko = Auth::user()->posko;
 
     if (!$subPosko) {
         return back()->with('error', 'Akun Anda belum terdaftar dalam posko manapun.');
     }
 
-    if ($request->hasFile('foto')) {
-        // Hapus foto lama jika ada
-        if ($subPosko->foto && Storage::disk('public')->exists($subPosko->foto)) {
-            Storage::disk('public')->delete($subPosko->foto);
+    if ($request->hasFile('fotos')) {
+        foreach ($request->file('fotos') as $file) {
+            $path = $file->store('dokumentasi', 'public');
+            
+            // Simpan sebagai data baru (tidak menimpa foto lama)
+            $subPosko->fotos()->create([
+                'path_file' => $path
+            ]);
         }
-
-        // Simpan foto baru
-        $path = $request->file('foto')->store('dokumentasi', 'public');
-        
-        // Update model Posko
-        $subPosko->update(['foto' => $path]);
     }
 
-    return back()->with('success', 'Dokumentasi berhasil diunggah!');
+    return back()->with('success', 'Dokumentasi foto berhasil ditambahkan!');
+}
+
+public function hapusFoto($id)
+{
+    $foto = \App\Models\PoskoFoto::findOrFail($id);
+    
+    // Pastikan foto milik posko user yang login
+    if ($foto->posko->id === Auth::user()->posko_id) {
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($foto->path_file)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($foto->path_file);
+        }
+        $foto->delete();
+    }
+
+    return back()->with('success', 'Foto berhasil dihapus.');
 }
 }
