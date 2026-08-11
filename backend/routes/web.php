@@ -13,10 +13,9 @@ use App\Http\Controllers\Komando\PengajuanKebutuhanController;
 
 /*
 |--------------------------------------------------------------------------
-| Root redirect — arahkan sesuai role yang login
+| Root Redirect — arahkan sesuai role yang login
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
     if (Auth::check()) {
         return match (Auth::user()->role) {
@@ -29,21 +28,27 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Belum Auth)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // ============ ADMIN (BPBD) ============
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        // Dashboard Admin
-        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
-    // ============ ADMIN (BPBD) ============
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:admin,bpbd')->prefix('admin')->name('admin.')->group(function () {
         // Dashboard Admin
         Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
@@ -51,62 +56,39 @@ Route::middleware('auth')->group(function () {
         Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
         Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
         Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
-        // Manajemen Posko Komando
-        Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
-        Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
-        Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
 
         // Manajemen Bencana
         Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
-        // Manajemen Bencana
-        Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
 
-        // Navigasi Lain
-        Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
-        // Navigasi Lain
+        // Permintaan Kebutuhan
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
 
-        // ===== MANAJEMEN STOK INVENTARIS =====
-        Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
-        Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
-        Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
-        Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
-        // ===== MANAJEMEN STOK INVENTARIS =====
+        // Manajemen Stok Inventaris
         Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
         Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
         Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
         Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
 
-        // ===== MANAJEMEN DISTRIBUSI LOGISTIK =====
-        Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi');
-        Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
-        Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
-        Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
-        // ===== MANAJEMEN DISTRIBUSI LOGISTIK =====
+        // Manajemen Distribusi Logistik
         Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi');
         Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
         Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
         Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
 
-        Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
-    });
+        // Laporan
         Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
     });
 
     // ============ KOMANDO (Posko Komando) ============
-    Route::middleware('role:komando')->prefix('komando')->name('komando.')->group(function () {
+    Route::middleware('role:komando,koordinator_komando,posko_komando')->prefix('komando')->name('komando.')->group(function () {
+        // Dashboard Komando
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
-        // Data Logistik (Diubah menggunakan namespace folder Komando)
+        // Data Logistik (Verifikasi Pengajuan dari Lapangan)
         Route::get('/logistik', [Komando\KomandoLogistikController::class, 'index'])->name('logistik.index');
         Route::post('/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
         Route::post('/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
         Route::post('/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
-        // Data Logistik (Verifikasi Pengajuan dari Lapangan)
-        Route::get('/logistik', [App\Http\Controllers\KomandoLogistikController::class, 'index'])->name('logistik.index');
-        Route::post('/logistik/{id}/approve', [App\Http\Controllers\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
-        Route::post('/logistik/{id}/approve-partial', [App\Http\Controllers\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
-        Route::post('/logistik/{id}/reject', [App\Http\Controllers\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
 
         // Distribusi Logistik ke Lapangan
         Route::get('/distribusi', fn() => view('dashboard.komando.distribusi.index'))->name('distribusi.index');
@@ -120,13 +102,12 @@ Route::middleware('auth')->group(function () {
 
     // ============ LAPANGAN (Posko Kecil) ============
     Route::middleware('role:lapangan')->prefix('lapangan')->name('lapangan.')->group(function () {
-
         // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
         Route::post('/dokumentasi/upload', [Lapangan\DashboardLapanganController::class, 'uploadFoto'])->name('dokumentasi.upload');
         Route::delete('/dokumentasi/{id}', [Lapangan\DashboardLapanganController::class, 'hapusFoto'])->name('dokumentasi.hapus');
 
-        // Pengajuan Logistik (Auto-predict ML diletakkan di index)
+        // Pengajuan Logistik
         Route::resource('pengajuan', Lapangan\PengajuanController::class);
 
         // Pendataan Pengungsi

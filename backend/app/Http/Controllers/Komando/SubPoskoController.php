@@ -19,11 +19,9 @@ class SubPoskoController extends Controller
             return back()->with('error', 'Akun Anda belum terhubung dengan Posko Utama.');
         }
 
-        // Base Query untuk efisiensi
         $baseQuery = Posko::where('parent_id', $komandoPoskoId)
             ->where('tipe_posko', 'lapangan_kecil');
 
-        // Query Data Sub-Posko dengan Filter Search
         $query = (clone $baseQuery)->with('bencana');
 
         if ($request->filled('search')) {
@@ -34,10 +32,8 @@ class SubPoskoController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Pagination 5 data per halaman
         $subPoskos = $query->latest()->paginate(5)->withQueryString();
 
-        // Data Statistik (Dioptimasi dengan me-reuse baseQuery)
         $totalPosko    = (clone $baseQuery)->count();
         $poskoAktif    = (clone $baseQuery)->where('status', 'aktif')->count();
         $poskoSiaga    = (clone $baseQuery)->where('status', 'siaga')->count();
@@ -70,7 +66,7 @@ class SubPoskoController extends Controller
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
-            'bencana_id'       => 'required|exists:bencana,id', // Sesuaikan jika nama tabelnya 'bencanas'
+            'bencana_id'       => 'required|exists:bencana,id',
             'penanggung_jawab' => 'required|string|max:255',
             'kontak_hp'        => 'nullable|string|max:20',
             'jumlah_petugas'   => 'nullable|integer|min:0',
@@ -135,9 +131,9 @@ class SubPoskoController extends Controller
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
-            'bencana_id'       => 'required|exists:bencana,id', // Sesuaikan jika nama tabelnya 'bencanas'
+            'bencana_id'       => 'required|exists:bencana,id',
             'penanggung_jawab' => 'required|string|max:255',
-            'status'           => 'required|in:aktif,siaga,nonaktif', // TAMBAHAN: Validasi status
+            'status'           => 'required|in:aktif,siaga,nonaktif',
             'kontak_hp'        => 'nullable|string|max:20',
             'jumlah_petugas'   => 'nullable|integer|min:0',
             'lokasi'           => 'nullable|string',
