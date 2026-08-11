@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function () {
 
         // Manajemen Bencana
         Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
+        Route::post('/bencana/{id}/reject', [Admin\BencanaController::class, 'reject'])->name('bencana.reject');
+        Route::post('/bencana/{id}/approve', [Admin\BencanaController::class, 'approve'])->name('bencana.approve');
 
         // Permintaan Kebutuhan
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
