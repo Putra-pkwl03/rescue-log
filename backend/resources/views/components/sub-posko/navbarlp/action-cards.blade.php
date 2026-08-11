@@ -43,7 +43,7 @@
             </span>
         </div>
         <div class="mt-6">
-            <h4 class="font-bold text-emerald-900 text-base">Status & Stok</h4>
+            <h4 class="font-bold text-emerald-900 text-base">Status Distribusi</h4>
             <p class="text-xs text-emerald-700/70 mt-1">Lihat status pengajuan dan stok logistik</p>
         </div>
     </a>

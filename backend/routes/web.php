@@ -94,13 +94,11 @@ Route::middleware('auth')->group(function () {
         // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
 
-        // Pengajuan Logistik (Auto-predict ML)
-        Route::get('/pengajuan/create', [Lapangan\PengajuanController::class, 'create'])->name('pengajuan.create');
-        Route::resource('pengajuan', Lapangan\PengajuanController::class)->except(['create']);
+        // Pengajuan Logistik (Auto-predict ML diletakkan di index)
+        Route::resource('pengajuan', Lapangan\PengajuanController::class);
 
         // Pendataan Pengungsi
-        Route::resource('pengungsi', Lapangan\PengungsiController::class)->except(['store']);
-        Route::post('/pengungsi', [PredictionController::class, 'store'])->name('pengungsi.store');
+        Route::resource('pengungsi', Lapangan\PengungsiController::class);
 
         // API Endpoint Prediksi ML Standalone (JSON)
         Route::get('/predict-logistik', [PredictionController::class, 'predict'])->name('predict.logistik');
