@@ -35,7 +35,6 @@ class UserSeeder extends Seeder
             'bpbd_id'  => $bpbd?->id,
         ]);
 
-        // Petugas Lapangan Standby (Posko dihubungkan nanti setelah Sub-Posko dibuat)
         User::create([
             'name'     => 'Petugas Lapangan A',
             'email'    => 'petugas@rescuelog.com',
