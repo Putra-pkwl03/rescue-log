@@ -8,6 +8,7 @@ use App\Http\Controllers\Komando;
 use App\Http\Controllers\Lapangan;
 use App\Http\Controllers\Admin\StokInventarisController;
 use App\Http\Controllers\Admin\DistribusiController;
+use App\Http\Controllers\Komando\PengajuanKebutuhanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,52 +37,52 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ============ ADMIN (BPBD) ============
-Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard Admin
-    Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    // ============ ADMIN (BPBD) ============
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        // Dashboard Admin
+        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
-    // Manajemen Posko Komando
-    Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
-    Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
-    Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
+        // Manajemen Posko Komando
+        Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
+        Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
+        Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
 
-    // Manajemen Bencana
-    Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
+        // Manajemen Bencana
+        Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
 
-    // Navigasi Lain
-    Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
+        // Navigasi Lain
+        Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
 
-    // ===== MANAJEMEN STOK INVENTARIS =====
-    Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
-    Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
-    Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
-    Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
+        // ===== MANAJEMEN STOK INVENTARIS =====
+        Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
+        Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
+        Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
+        Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
 
-    // ===== MANAJEMEN DISTRIBUSI LOGISTIK =====
-    Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi');
-    Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
-    Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
-    Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
+        // ===== MANAJEMEN DISTRIBUSI LOGISTIK =====
+        Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi');
+        Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
+        Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
+        Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
 
-    Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
-});
+        Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
+    });
 
     // ============ KOMANDO (Posko Komando) ============
     Route::middleware('role:komando')->prefix('komando')->name('komando.')->group(function () {
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
-        // Data Logistik
+        // Data Logistik (Verifikasi Pengajuan dari Lapangan)
         Route::get('/logistik', [App\Http\Controllers\KomandoLogistikController::class, 'index'])->name('logistik.index');
         Route::post('/logistik/{id}/approve', [App\Http\Controllers\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
         Route::post('/logistik/{id}/approve-partial', [App\Http\Controllers\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
         Route::post('/logistik/{id}/reject', [App\Http\Controllers\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
 
-        // Distribusi Logistik
+        // Distribusi Logistik ke Lapangan
         Route::get('/distribusi', fn() => view('dashboard.komando.distribusi.index'))->name('distribusi.index');
 
-        // Pengajuan Kebutuhan
-        Route::get('/pengajuan', fn() => view('dashboard.komando.pengajuan.index'))->name('pengajuan.index');
+        // Pengajuan Kebutuhan Logistik ke BPBD
+        Route::resource('pengajuan', PengajuanKebutuhanController::class);
 
         // Kelola Posko Kecil / Sub-Posko
         Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');

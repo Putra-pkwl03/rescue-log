@@ -10,12 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class SubPoskoController extends Controller
 {
     public function index(Request $request)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
         // Query Data Sub-Posko dengan Filter Search
         $query = Posko::with('bencana')
@@ -58,7 +59,7 @@ class SubPoskoController extends Controller
 
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
@@ -118,7 +119,7 @@ class SubPoskoController extends Controller
 
     public function show($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
         $subPosko = Posko::with(['bencana', 'users'])
             ->where('parent_id', $komandoPoskoId)
@@ -129,7 +130,7 @@ class SubPoskoController extends Controller
 
     public function edit($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
         $bencanaAktif = Bencana::where('status', 'sedang_berjalan')->get();
@@ -139,7 +140,7 @@ class SubPoskoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
 
         $validated = $request->validate([
@@ -176,7 +177,7 @@ class SubPoskoController extends Controller
 
     public function destroy($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
 
         DB::transaction(function () use ($subPosko) {
@@ -196,7 +197,7 @@ class SubPoskoController extends Controller
 
     public function regenerateCode($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
 
         $kodeBaru = Posko::generateKodeUndangan();
