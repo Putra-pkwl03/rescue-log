@@ -19,7 +19,7 @@
     @include('layouts.navbar-lapangan')
 
     <!-- Konten Utama Halaman Lapangan (Background & Isi) -->
-    <main class="flex-grow">
+    <main class="grow">
         <div class="w-full px-6 lg:px-10 py-6">
             @yield('content')
         </div>

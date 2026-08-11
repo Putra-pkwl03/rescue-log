@@ -8,6 +8,7 @@ use App\Http\Controllers\Komando;
 use App\Http\Controllers\Lapangan;
 use App\Http\Controllers\Admin\StokInventarisController;
 use App\Http\Controllers\Admin\DistribusiController;
+use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\Komando\PengajuanKebutuhanController;
 
 /*
@@ -41,7 +42,15 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         // Dashboard Admin
         Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    // ============ ADMIN (BPBD) ============
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        // Dashboard Admin
+        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
+        // Manajemen Posko Komando
+        Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
+        Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
+        Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
         // Manajemen Posko Komando
         Route::post('/posko/store', [Admin\DashboardController::class, 'storePosko'])->name('posko.store');
         Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
@@ -49,10 +58,19 @@ Route::middleware('auth')->group(function () {
 
         // Manajemen Bencana
         Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
+        // Manajemen Bencana
+        Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
 
         // Navigasi Lain
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
+        // Navigasi Lain
+        Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
 
+        // ===== MANAJEMEN STOK INVENTARIS =====
+        Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
+        Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
+        Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
+        Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
         // ===== MANAJEMEN STOK INVENTARIS =====
         Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
         Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');
@@ -64,7 +82,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
         Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
         Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
+        // ===== MANAJEMEN DISTRIBUSI LOGISTIK =====
+        Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi');
+        Route::post('/distribusi/kirim', [DistribusiController::class, 'store'])->name('distribusi.store');
+        Route::put('/distribusi/{id}', [DistribusiController::class, 'update'])->name('distribusi.update');
+        Route::delete('/distribusi/{id}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
 
+        Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
+    });
         Route::get('/laporan', fn() => view('dashboard.admin.laporan.index'))->name('laporan');
     });
 
@@ -72,6 +97,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:komando')->prefix('komando')->name('komando.')->group(function () {
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
+        // Data Logistik (Diubah menggunakan namespace folder Komando)
+        Route::get('/logistik', [Komando\KomandoLogistikController::class, 'index'])->name('logistik.index');
+        Route::post('/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
+        Route::post('/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
+        Route::post('/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
         // Data Logistik (Verifikasi Pengajuan dari Lapangan)
         Route::get('/logistik', [App\Http\Controllers\KomandoLogistikController::class, 'index'])->name('logistik.index');
         Route::post('/logistik/{id}/approve', [App\Http\Controllers\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
@@ -93,12 +123,17 @@ Route::middleware('auth')->group(function () {
 
         // Dashboard Lapangan
         Route::get('/dashboard', [Lapangan\DashboardLapanganController::class, 'index'])->name('dashboard');
+        Route::post('/dokumentasi/upload', [Lapangan\DashboardLapanganController::class, 'uploadFoto'])->name('dokumentasi.upload');
+        Route::delete('/dokumentasi/{id}', [Lapangan\DashboardLapanganController::class, 'hapusFoto'])->name('dokumentasi.hapus');
 
-        // Pengajuan Logistik
+        // Pengajuan Logistik (Auto-predict ML diletakkan di index)
         Route::resource('pengajuan', Lapangan\PengajuanController::class);
 
-        // Pendataan Pengungsi / KK
+        // Pendataan Pengungsi
         Route::resource('pengungsi', Lapangan\PengungsiController::class);
+
+        // API Endpoint Prediksi ML Standalone (JSON)
+        Route::get('/predict-logistik', [PredictionController::class, 'predict'])->name('predict.logistik');
 
         // Penyaluran & Pencatatan Stok
         Route::resource('penyaluran', Lapangan\PenyaluranController::class);

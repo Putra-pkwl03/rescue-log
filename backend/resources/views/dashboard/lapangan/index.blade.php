@@ -13,30 +13,6 @@
     <!-- 4 Card Menu Interaktif di Bawah -->
     @include('components.sub-posko.navbarlp.action-cards')
 
-    <div class="lg:col-span-2 space-y-6">
-        @if (view()->exists('components.sub-posko.detail.hero-card'))
-            <x-sub-posko.detail.hero-card :sub-posko="$subPosko" />
-        @else
-            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                <h2 class="font-semibold text-lg text-gray-700">Ringkasan Posko</h2>
-                <p class="text-sm text-gray-500 mt-2">Komponen hero-card siap ditampilkan.</p>
-            </div>
-        @endif
-
-        @if (view()->exists('components.sub-posko.maps.picker'))
-            <x-sub-posko.maps.picker :sub-posko="$subPosko" />
-        @elseif(view()->exists('components.sub-posko.map-widget'))
-            <x-sub-posko.map-widget :sub-posko="$subPosko" />
-        @else
-            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                <h2 class="font-semibold text-lg text-gray-700">Peta Lokasi Lapangan</h2>
-                <div class="h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 mt-3">
-                    [ Peta Lapangan Akan Tampil Di Sini ]
-                </div>
-            </div>
-        @endif
-    </div>
-
     <div class="space-y-6">
         @if (view()->exists('components.sub-posko.alert'))
             <x-sub-posko.alert :sub-posko="$subPosko" />

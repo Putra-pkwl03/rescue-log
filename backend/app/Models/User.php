@@ -17,7 +17,6 @@ class User extends Authenticatable
         'role',  
         'posko_id',
         'bpbd_id',
-        'kode_sub_posko',
     ];
 
     protected $hidden = [
@@ -34,9 +33,10 @@ class User extends Authenticatable
     }
 
     // Relasi: User/Petugas berada di 1 Posko
+    // Di dalam class User
     public function posko()
     {
-        return $this->belongsTo(Posko::class);
+        return $this->belongsTo(Posko::class, 'posko_id');
     }
 
     public function bpbd()

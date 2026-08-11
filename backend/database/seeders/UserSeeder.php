@@ -14,11 +14,14 @@ class UserSeeder extends Seeder
     {
         $bpbd = Bpbd::first();
         $poskoKomando = Posko::where('tipe_posko', 'komando')->first();
+        
+        // Ambil posko lapangan yang baru dibuat di PoskoSeeder
+        $poskoLapangan = Posko::where('tipe_posko', 'lapangan_kecil')->first();
 
         // Admin Utama BPBD
         User::create([
             'name'     => 'Admin BPBD Utama',
-            'email'    => 'admin@bpbd.go.id',
+            'email'    => 'admin@bpbd.com',
             'password' => Hash::make('password123'),
             'role'     => 'admin',
             'posko_id' => null,
@@ -35,13 +38,13 @@ class UserSeeder extends Seeder
             'bpbd_id'  => $bpbd?->id,
         ]);
 
-        // Petugas Lapangan Standby (Posko dihubungkan nanti setelah Sub-Posko dibuat)
+        // Petugas Lapangan A (Dihubungkan ke posko_id lapangan)
         User::create([
             'name'     => 'Petugas Lapangan A',
             'email'    => 'petugas@rescuelog.com',
             'password' => Hash::make('password123'),
             'role'     => 'lapangan',
-            'posko_id' => null, 
+            'posko_id' => $poskoLapangan?->id, // <-- Diisi relasi poskonya
             'bpbd_id'  => $bpbd?->id,
         ]);
     }

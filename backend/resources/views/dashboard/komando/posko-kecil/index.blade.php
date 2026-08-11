@@ -3,7 +3,7 @@
 @section('title', 'Daftar Posko Kecil - SiGap BPBD')
 
 @section('content')
-<div class="mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
 
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
