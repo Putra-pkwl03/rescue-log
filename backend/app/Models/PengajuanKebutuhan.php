@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\PengajuanKebutuhanDetail; // Mengatasi garis merah pada IDE
+use App\Models\PengajuanKebutuhanDetail;
 
 class PengajuanKebutuhan extends Model
 {
@@ -21,6 +21,14 @@ class PengajuanKebutuhan extends Model
         'status',
         'catatan_komando',
     ];
+
+    /**
+     * Relasi ke Pengiriman (Solusi error BadMethodCallException)
+     */
+    public function pengiriman()
+    {
+        return $this->hasOne(Pengiriman::class, 'pengajuan_kebutuhan_id');
+    }
 
     public function details()
     {

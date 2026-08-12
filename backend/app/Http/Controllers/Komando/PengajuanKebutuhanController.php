@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\DB;
 
 class PengajuanKebutuhanController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 1: PENGAJUAN LOGISTIK KELUAR (Komando -> BPBD)
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Menampilkan daftar semua pengajuan logistik Posko Komando ke BPBD.
      */
@@ -51,7 +57,7 @@ class PengajuanKebutuhanController extends Controller
         // Data Pendukung untuk Form Modal / Select Pengajuan Baru
         $bencanaAktif   = Bencana::orderBy('jenis_bencana', 'asc')->get();
         
-        // Ambil seluruh daftar stok_inventaris tanpa filter 'jumlah > 0' agar dropdown modal tidak kosong
+        // Ambil seluruh daftar stok_inventaris tanpa filter 'jumlah > 0'
         $barangs        = StokInventaris::orderBy('nama_barang', 'asc')->get();
 
         return view('dashboard.komando.pengajuan.index', compact(
@@ -122,7 +128,7 @@ class PengajuanKebutuhanController extends Controller
     }
 
     /**
-     * Membatalkan / Menghapus pengajuan (Hanya jika status 'pending').
+     * Membatalkan / Menghapus pengajuan ke BPBD (Hanya jika status 'pending').
      */
     public function destroy($id)
     {
@@ -141,5 +147,89 @@ class PengajuanKebutuhanController extends Controller
 
         return redirect()->route('komando.pengajuan.index')
             ->with('success', 'Pengajuan kebutuhan berhasil dibatalkan.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 2: VERIFIKASI PENGAJUAN LOGISTIK MASUK (Lapangan -> Komando)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Menampilkan daftar pengajuan logistik yang MASUK dari Posko Lapangan.
+     */
+    public function logistikMasuk(Request $request)
+    {
+        $query = PengajuanKebutuhan::with(['posko', 'bencana', 'details.barang', 'user'])
+            ->whereHas('posko', function ($q) {
+                // Disesuaikan dengan kolom 'tipe_posko' dan enum 'lapangan_kecil'
+                $q->where('tipe_posko', 'lapangan_kecil');
+            });
+
+        // Filter berdasarkan pencarian kode pengajuan atau nama posko
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_pengajuan', 'ILIKE', "%{$search}%")
+                  ->orWhereHas('posko', function ($p) use ($search) {
+                      $p->where('nama_posko', 'ILIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $pengajuans = $query->latest()->paginate(10)->withQueryString();
+
+        // Counter statistik pengajuan masuk
+        $pendingCount   = PengajuanKebutuhan::whereHas('posko', fn($q) => $q->where('tipe_posko', 'lapangan_kecil'))->where('status', 'pending')->count();
+        $disetujuiCount = PengajuanKebutuhan::whereHas('posko', fn($q) => $q->where('tipe_posko', 'lapangan_kecil'))->whereIn('status', ['disetujui', 'disetujui_sebagian'])->count();
+        $ditolakCount   = PengajuanKebutuhan::whereHas('posko', fn($q) => $q->where('tipe_posko', 'lapangan_kecil'))->where('status', 'ditolak')->count();
+
+        return view('dashboard.komando.logistik.index', compact(
+            'pengajuans',
+            'pendingCount',
+            'disetujuiCount',
+            'ditolakCount'
+        ));
+    }
+
+    /**
+     * Memperbarui status pengajuan logistik dari Posko Lapangan (Persetujuan/Penolakan).
+     */
+    public function updateStatusLogistik(Request $request, $id)
+    {
+        $request->validate([
+            'status'            => 'required|in:disetujui,disetujui_sebagian,ditolak',
+            'catatan_komando'   => 'nullable|string|max:1000',
+            'items'             => 'nullable|array',
+            'items.*.id'        => 'required_with:items|exists:pengajuan_kebutuhan_detail,id',
+            'items.*.disetujui' => 'required_with:items|integer|min:0',
+        ]);
+
+        DB::transaction(function () use ($request, $id) {
+            $pengajuan = PengajuanKebutuhan::findOrFail($id);
+
+            // Update header pengajuan
+            $pengajuan->update([
+                'status'            => $request->status,
+                'catatan_komando'   => $request->catatan_komando,
+                'user_id_responder' => Auth::id(),
+            ]);
+
+            // Update kuantitas barang yang disetujui pada detail item
+            if ($request->filled('items')) {
+                foreach ($request->items as $item) {
+                    PengajuanKebutuhanDetail::where('id', $item['id'])->update([
+                        'jumlah_disetujui' => $item['disetujui'],
+                    ]);
+                }
+            }
+        });
+
+        return back()->with('success', 'Status pengajuan logistik dari Posko Lapangan berhasil diperbarui.');
     }
 }

@@ -3,19 +3,20 @@
 namespace App\Http\Controllers\Komando;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pengajuan;
+use App\Models\PengajuanKebutuhan;
 use Illuminate\Http\Request;
 
 class KomandoLogistikController extends Controller
 {
     /**
-     * Menampilkan daftar pengajuan logistik dari posko lapangan
+     * Menampilkan daftar pengajuan kebutuhan logistik
      */
     public function index(Request $request)
     {
-        $query = Pengajuan::with('user')->latest();
+        // Eager load relasi 'user', 'posko', 'bencana', dan 'details' untuk optimasi query
+        $query = PengajuanKebutuhan::with(['user', 'posko', 'bencana', 'details'])->latest();
 
-        // Filter berdasarkan pencarian nama posko / kode pengajuan
+        // Filter berdasarkan pencarian (kode pengajuan atau nama pemohon)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -31,52 +32,54 @@ class KomandoLogistikController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Kirim data pengajuan ke view
+        // Ambil data dengan pagination & pertahankan query string saat berpindah halaman
         $pengajuans = $query->paginate(10)->withQueryString();
 
-        return view('dashboard.komando.logistik.index', compact('pengajuans'));
+        // Sesuaikan nama view dengan lokasi folder yang Anda gunakan:
+        // Gunakan 'dashboard.admin.permintaan.index' atau 'dashboard.komando.logistik.index'
+        return view('dashboard.admin.permintaan.index', compact('pengajuans'));
     }
 
     /**
-     * Menyetujui Pengajuan Secara Penuh (Approved)
+     * Menyetujui Pengajuan Kebutuhan Secara Penuh (Approved)
      */
     public function approve($id)
     {
-        $pengajuan = Pengajuan::findOrFail($id);
-        $pengajuan->update([
+        $pengajuanKebutuhan = PengajuanKebutuhan::findOrFail($id);
+        $pengajuanKebutuhan->update([
             'status' => 'approved',
         ]);
 
-        return redirect()->back()->with('success', "Pengajuan ({$pengajuan->kode_pengajuan}) berhasil disetujui penuh.");
+        return redirect()->back()->with('success', "Pengajuan ({$pengajuanKebutuhan->kode_pengajuan}) berhasil disetujui penuh.");
     }
 
     /**
-     * Menyetujui Pengajuan Sebagian (Partial)
+     * Menyetujui Pengajuan Kebutuhan Sebagian (Partial)
      */
     public function approvePartial(Request $request, $id)
     {
-        $pengajuan = Pengajuan::findOrFail($id);
+        $pengajuanKebutuhan = PengajuanKebutuhan::findOrFail($id);
 
-        $pengajuan->update([
+        $pengajuanKebutuhan->update([
             'status' => 'partial',
             'catatan_komando' => $request->catatan_komando ?? 'Disetujui sebagian sesuai ketersediaan stok.',
         ]);
 
-        return redirect()->back()->with('success', "Pengajuan ({$pengajuan->kode_pengajuan}) disetujui sebagian.");
+        return redirect()->back()->with('success', "Pengajuan ({$pengajuanKebutuhan->kode_pengajuan}) disetujui sebagian.");
     }
 
     /**
-     * Menolak Pengajuan (Rejected)
+     * Menolak Pengajuan Kebutuhan (Rejected)
      */
     public function reject(Request $request, $id)
     {
-        $pengajuan = Pengajuan::findOrFail($id);
+        $pengajuanKebutuhan = PengajuanKebutuhan::findOrFail($id);
 
-        $pengajuan->update([
+        $pengajuanKebutuhan->update([
             'status' => 'rejected',
-            'catatan_komando' => $request->catatan_komando ?? 'Pengajuan ditolak oleh Posko Komando.',
+            'catatan_komando' => $request->catatan_komando ?? 'Pengajuan ditolak oleh BPBD.',
         ]);
 
-        return redirect()->back()->with('success', "Pengajuan ({$pengajuan->kode_pengajuan}) telah ditolak.");
+        return redirect()->back()->with('success', "Pengajuan ({$pengajuanKebutuhan->kode_pengajuan}) telah ditolak.");
     }
 }

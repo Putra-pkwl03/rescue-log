@@ -9,7 +9,11 @@ use App\Http\Controllers\Lapangan;
 use App\Http\Controllers\Admin\StokInventarisController;
 use App\Http\Controllers\Admin\DistribusiController;
 use App\Http\Controllers\PredictionController;
+
+// Import Controller Role Komando
 use App\Http\Controllers\Komando\PengajuanKebutuhanController;
+use App\Http\Controllers\Komando\PengirimanController;
+use App\Http\Controllers\Komando\ArmadaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,17 +90,20 @@ Route::middleware('auth')->group(function () {
         // Dashboard Komando
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
-        // Data Logistik (Verifikasi Pengajuan dari Lapangan)
-        Route::get('/logistik', [Komando\KomandoLogistikController::class, 'index'])->name('logistik.index');
-        Route::post('/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
-        Route::post('/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
-        Route::post('/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
+        // Menu 2: Data Logistik Masuk (Verifikasi & Persetujuan Pengajuan dari Posko Lapangan)
+        Route::get('/logistik', [PengajuanKebutuhanController::class, 'logistikMasuk'])->name('logistik.index');
+        Route::patch('/logistik/{id}/status', [PengajuanKebutuhanController::class, 'updateStatusLogistik'])->name('logistik.update-status');
 
-        // Distribusi Logistik ke Lapangan
-        Route::get('/distribusi', fn() => view('dashboard.komando.distribusi.index'))->name('distribusi.index');
+        // Master Data Armada (Kendaraan & Driver)
+        Route::resource('armada', ArmadaController::class)->except(['create', 'edit', 'show']);
 
-        // Pengajuan Kebutuhan Logistik ke BPBD
-        Route::resource('pengajuan', PengajuanKebutuhanController::class);
+        // Menu 3: Distribusi Logistik & Rute Peta
+        Route::get('/distribusi', [PengirimanController::class, 'index'])->name('distribusi.index');
+        Route::post('/distribusi', [PengirimanController::class, 'store'])->name('distribusi.store');
+        Route::patch('/distribusi/{id}/status', [PengirimanController::class, 'updateStatus'])->name('distribusi.update-status');
+
+        // Pengajuan Kebutuhan Logistik Komando ke BPBD
+        Route::resource('pengajuan', PengajuanKebutuhanController::class)->only(['index', 'store', 'destroy']);
 
         // Kelola Posko Kecil / Sub-Posko
         Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');

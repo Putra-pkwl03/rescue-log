@@ -8,14 +8,8 @@
 
     <!-- Header Logo & Subtitle -->
     <div class="p-5 flex items-center gap-3 border-b border-indigo-900/40">
-        <div
-            class="bg-indigo-600/30 p-2.5 rounded-xl flex items-center justify-center border border-indigo-400/20 shrink-0">
-            <svg class="w-6 h-6 text-indigo-300" style="width: 24px; height: 24px;" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                </path>
-            </svg>
+        <div class="w-10 h-10 flex-shrink-0">
+            <img src="{{ asset('img/rescue-log.png') }}" alt="Logo" class="w-10 h-10 object-contain">
         </div>
 
         <div x-show="sidebarOpen" x-transition.opacity class="whitespace-nowrap overflow-hidden">
@@ -88,25 +82,25 @@
 
                 <a href="{{ route('komando.logistik.index') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('komando.logistik.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
-                    <x-heroicon-o-document-text class="w-5 h-5 shrink-0" />
+                    <x-fas-boxes-stacked class="w-5 h-5 shrink-0" />
                     <span x-show="sidebarOpen" class="whitespace-nowrap">Data Logistik</span>
                 </a>
 
                 <a href="{{ route('komando.distribusi.index') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('komando.distribusi.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
-                    <x-heroicon-s-arrows-right-left class="w-5 h-5 shrink-0" />
+                    <x-fas-truck class="w-5 h-5 shrink-0" />
                     <span x-show="sidebarOpen" class="whitespace-nowrap">Distribusi Logistik</span>
                 </a>
 
                 <a href="{{ route('komando.pengajuan.index') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('komando.pengajuan.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
-                    <x-heroicon-o-document class="w-5 h-5 shrink-0" />
+                    <x-fas-clipboard-list class="w-5 h-5 shrink-0" />
                     <span x-show="sidebarOpen" class="whitespace-nowrap">Pengajuan Kebutuhan</span>
                 </a>
 
                 <a href="{{ route('komando.posko-kecil.index') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('komando.posko-kecil.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
-                    <x-heroicon-o-building-office class="w-5 h-5 shrink-0" />
+                    <x-heroicon-s-map-pin class="w-5 h-5 shrink-0" />
                     <span x-show="sidebarOpen" class="whitespace-nowrap">Pendataan Pos Kecil</span>
                 </a>
 

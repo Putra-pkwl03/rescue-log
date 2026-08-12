@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PengajuanKebutuhanDetail extends Model
 {
@@ -20,12 +21,12 @@ class PengajuanKebutuhanDetail extends Model
         'keterangan',
     ];
 
-    public function pengajuanKebutuhan()
+    public function pengajuanKebutuhan(): BelongsTo
     {
         return $this->belongsTo(PengajuanKebutuhan::class, 'pengajuan_kebutuhan_id');
     }
 
-    public function barang()
+    public function barang(): BelongsTo
     {
         return $this->belongsTo(StokInventaris::class, 'barang_id');
     }
