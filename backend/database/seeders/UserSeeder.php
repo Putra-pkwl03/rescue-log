@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             'email'    => 'petugas@rescuelog.com',
             'password' => Hash::make('password123'),
             'role'     => 'lapangan',
-            'posko_id' => $poskoLapangan?->id, // <-- Diisi relasi poskonya
+            'posko_id' => $poskoLapangan?->id,
             'bpbd_id'  => $bpbd?->id,
         ]);
     }

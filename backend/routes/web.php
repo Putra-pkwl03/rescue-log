@@ -9,6 +9,7 @@ use App\Http\Controllers\Lapangan;
 use App\Http\Controllers\Admin\StokInventarisController;
 use App\Http\Controllers\Admin\DistribusiController;
 use App\Http\Controllers\PredictionController;
+use App\Http\Controllers\Komando\KomandoDistribusiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,19 +73,14 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:komando')->prefix('komando')->name('komando.')->group(function () {
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
-        // Data Logistik (Diubah menggunakan namespace folder Komando)
+        // Mengizinkan GET dan POST untuk proses persetujuan
         Route::get('/logistik', [Komando\KomandoLogistikController::class, 'index'])->name('logistik.index');
-        Route::post('/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
-        Route::post('/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
-        Route::post('/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
+        Route::match(['get', 'post'], '/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
+        Route::match(['get', 'post'], '/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
+        Route::match(['get', 'post'], '/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
 
-        // Distribusi Logistik
-        Route::get('/distribusi', fn() => view('dashboard.komando.distribusi.index'))->name('distribusi.index');
-
-        // Pengajuan Kebutuhan
+        Route::get('/distribusi', [KomandoDistribusiController::class, 'index'])->name('distribusi.index');
         Route::get('/pengajuan', fn() => view('dashboard.komando.pengajuan.index'))->name('pengajuan.index');
-
-        // Kelola Posko Kecil / Sub-Posko
         Route::resource('posko-kecil', Komando\SubPoskoController::class)->names('posko-kecil');
     });
 
@@ -96,7 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/dokumentasi/upload', [Lapangan\DashboardLapanganController::class, 'uploadFoto'])->name('dokumentasi.upload');
         Route::delete('/dokumentasi/{id}', [Lapangan\DashboardLapanganController::class, 'hapusFoto'])->name('dokumentasi.hapus');
 
-        // Pengajuan Logistik (Auto-predict ML diletakkan di index)
+        // Pengajuan Logistik
         Route::resource('pengajuan', Lapangan\PengajuanController::class);
 
         // Pendataan Pengungsi
@@ -108,8 +104,8 @@ Route::middleware('auth')->group(function () {
         // Penyaluran & Pencatatan Stok
         Route::resource('penyaluran', Lapangan\PenyaluranController::class);
 
-        // Status Distribusi & Stok
+        // Status Distribusi & Stok (Sesuaikan nama parameter {id})
         Route::get('/stok', [Lapangan\StokController::class, 'index'])->name('stok.index');
-        Route::post('/stok/konfirmasi/{id}', [Lapangan\StokController::class, 'konfirmasiSampai'])->name('stok.konfirmasi');
+        Route::post('/stok/{id}/konfirmasi', [Lapangan\StokController::class, 'konfirmasiSampai'])->name('stok.konfirmasi');
     });
 });

@@ -12,6 +12,7 @@ class StokInventaris extends Model
     protected $table = 'stok_inventaris';
 
     protected $fillable = [
+        'posko_id', // TAMBAHKAN KOLOM INI SANGAT PENTING
         'nama_barang',
         'kategori',
         'jumlah',
@@ -19,7 +20,6 @@ class StokInventaris extends Model
         'keterangan',
     ];
 
-    // Tambahkan di dalam class StokInventaris
     public function pengiriman()
     {
         return $this->hasMany(PengirimanInventaris::class, 'stok_inventaris_id');
