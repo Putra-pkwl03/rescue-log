@@ -32,7 +32,6 @@
     }
 }">
 
-    <!-- Header Section -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Manajemen Stok Inventaris (BPBD)</h1>
@@ -53,28 +52,6 @@
         </div>
     </div>
 
-    <!-- Alert Notifications -->
-    @if(session('success'))
-    <div class="mb-6 bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm">
-        <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span class="font-medium text-sm">{{ session('success') }}</span>
-        </div>
-        <button onclick="this.parentElement.remove()" class="text-green-600 hover:text-green-900 font-bold text-lg">&times;</button>
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div class="mb-6 bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm">
-        <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span class="font-medium text-sm">{{ session('error') }}</span>
-        </div>
-        <button onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-900 font-bold text-lg">&times;</button>
-    </div>
-    @endif
-
-    <!-- Ringkasan Statistik & Tabel Utama -->
     <x-admin.inventaris.stats-cards :stokInventaris="$stokInventaris" />
 
     <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-8">
@@ -82,7 +59,6 @@
         <x-admin.inventaris.table :stokInventaris="$stokInventaris" />
     </div>
 
-    <!-- Modals -->
     <x-admin.inventaris.modal-add />
     <x-admin.inventaris.modal-edit />
     <x-admin.inventaris.modal-kirim :stokInventaris="$stokInventaris" :poskoKomando="$poskoKomando" />

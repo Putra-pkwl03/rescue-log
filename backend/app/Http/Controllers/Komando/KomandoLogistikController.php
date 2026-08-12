@@ -10,12 +10,14 @@ use Illuminate\Http\Request;
 class KomandoLogistikController extends Controller
 {
     /**
-     * Menampilkan daftar pengajuan logistik dari posko lapangan
+     * Menampilkan daftar pengajuan kebutuhan logistik dari posko lapangan
      */
     public function index(Request $request)
     {
-        $query = Pengajuan::with('user')->latest();
+        // Eager load relasi 'user' dan 'posko' untuk optimasi query
+        $query = Pengajuan::with(['user', 'posko'])->latest();
 
+        // Filter berdasarkan pencarian (kode pengajuan atau nama pemohon)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -26,21 +28,24 @@ class KomandoLogistikController extends Controller
             });
         }
 
+        // Filter berdasarkan status pengajuan
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // Ambil data dengan pagination & pertahankan query string saat berpindah halaman
         $pengajuans = $query->paginate(10)->withQueryString();
 
         return view('dashboard.komando.logistik.index', compact('pengajuans'));
     }
 
     /**
-     * Menyetujui Pengajuan Secara Penuh (Approved)
+     * Menyetujui Pengajuan Kebutuhan Secara Penuh (Approved)
      */
     public function approve($id)
     {
         $pengajuan = Pengajuan::with('user')->findOrFail($id);
+        
         $pengajuan->update([
             'status' => 'approved',
         ]);
@@ -65,7 +70,7 @@ class KomandoLogistikController extends Controller
             [
                 'posko_id'          => $pengajuan->posko_id ?? ($pengajuan->user->posko_id ?? null),
                 'user_id'           => $pengajuan->user_id,
-                'jumlah_dikirim'    => max(1, (int) $totalItems), // Mencegah nilai null
+                'jumlah_dikirim'    => max(1, (int) round($totalItems)),
                 'status_distribusi' => 'Dalam Pengiriman (Dikirim Komando)',
                 'estimasi_waktu'    => 'Hari ini, ± ' . now()->addHours(2)->format('H:i') . ' WIB',
             ]
@@ -75,7 +80,7 @@ class KomandoLogistikController extends Controller
     }
 
     /**
-     * Menyetujui Pengajuan Sebagian (Partial)
+     * Menyetujui Pengajuan Kebutuhan Sebagian (Partial)
      */
     public function approvePartial(Request $request, $id)
     {
@@ -114,7 +119,7 @@ class KomandoLogistikController extends Controller
             [
                 'posko_id'          => $pengajuan->posko_id ?? ($pengajuan->user->posko_id ?? null),
                 'user_id'           => $pengajuan->user_id,
-                'jumlah_dikirim'    => max(1, (int) $totalItems), // Mencegah nilai null
+                'jumlah_dikirim'    => max(1, (int) round($totalItems)),
                 'status_distribusi' => 'Dalam Pengiriman (Disetujui Sebagian)',
                 'estimasi_waktu'    => 'Hari ini, ± ' . now()->addHours(2)->format('H:i') . ' WIB',
             ]
@@ -122,9 +127,9 @@ class KomandoLogistikController extends Controller
 
         return redirect()->back()->with('success', "Pengajuan ({$pengajuan->kode_pengajuan}) disetujui sebagian.");
     }
-    
+
     /**
-     * Menolak Pengajuan (Rejected)
+     * Menolak Pengajuan Kebutuhan (Rejected)
      */
     public function reject(Request $request, $id)
     {

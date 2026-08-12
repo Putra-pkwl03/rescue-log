@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Data Logistik & Pengajuan')
+
 @section('content')
 <!-- JUDUL & PENJELASAN HALAMAN -->
 <div class="mb-8">
@@ -7,7 +9,7 @@
     <p class="text-base text-gray-700 mt-2">Kelola, pantau, dan konfirmasi pengajuan kebutuhan logistik dari posko-posko lapangan.</p>
 </div>
 
-<!-- ALERT NOTIFIKASI -->
+<!-- ALERT NOTIFIKASI SUCCESS -->
 @if(session('success'))
     <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium flex items-center justify-between shadow-sm">
         <div class="flex items-center gap-2">
@@ -29,11 +31,8 @@
             <i data-lucide="cpu" class="w-6 h-6"></i>
         </div>
         <div>
-            <div class="flex items-center gap-3 mb-1">
-                <h2 class="text-lg font-bold tracking-tight">AI Prediksi Stok Logistik</h2>
-                <span class="px-2.5 py-0.5 text-xs font-bold bg-amber-400 text-slate-900 rounded-md uppercase tracking-wider shadow-sm">AKTIF</span>
-            </div>
-            <p class="text-blue-100 text-sm leading-relaxed max-w-3xl">
+            <h2 class="text-xl font-bold tracking-tight">AI Prediksi Stok Logistik <span class="text-xs bg-amber-400 text-slate-900 px-2 py-0.5 rounded-md uppercase font-extrabold ml-2">Aktif</span></h2>
+            <p class="text-blue-100 text-sm leading-relaxed max-w-3xl mt-1">
                 Sistem Machine Learning memantau tren pengajuan dari seluruh posko lapangan secara real-time untuk memastikan akurasi distribusi logistik bantuan bencana.
             </p>
         </div>
@@ -93,7 +92,7 @@
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor pengajuan atau posko..." class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
         </div>
 
-        <select name="status" class="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none">
+        <select name="status" class="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none cursor-pointer">
             <option value="">Semua Status</option>
             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui Full</option>
@@ -102,7 +101,7 @@
         </select>
     </div>
 
-    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
         <i data-lucide="filter" class="w-4 h-4"></i>
         Filter Data
     </button>

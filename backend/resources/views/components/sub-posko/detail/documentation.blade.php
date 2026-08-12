@@ -10,11 +10,11 @@
         <div class="text-red-500 text-xs bg-red-50 p-2 rounded-lg border border-red-100">{{ $message }}</div>
     @enderror
 
-    <!-- Grid Foto (Dibuat responsif dinamis menyesuaikan jumlah foto) -->
+    <!-- Grid Foto -->
     <div class="grid grid-cols-3 gap-2">
         
-        <!-- 1. Looping Semua Foto dari Relasi -->
-        @if($subPosko && $subPosko->fotos)
+        <!-- 1. Looping Semua Foto dari Relasi (Pengecekan Aman isset) -->
+        @if(isset($subPosko->fotos) && !empty($subPosko->fotos))
             @foreach($subPosko->fotos as $foto)
                 <div class="h-40 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative group cursor-pointer"
                      onclick="openLightbox('{{ asset('storage/' . $foto->path_file) }}', '{{ basename($foto->path_file) }}')"
@@ -29,7 +29,7 @@
             @endforeach
         @endif
 
-        <!-- 2. Form Upload Foto (Mendukung Multi-select dengan atribut multiple) -->
+        <!-- 2. Form Upload Foto -->
         <form action="{{ route('lapangan.dokumentasi.upload') }}" method="POST" enctype="multipart/form-data" class="h-40">
             @csrf
             <label class="h-full rounded-lg bg-slate-50 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 hover:border-blue-400 hover:text-blue-500 transition cursor-pointer">
@@ -37,21 +37,18 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                 </svg>
                 <span class="text-[10px] font-bold uppercase tracking-wider">Upload</span>
-                
-                <!-- Tambahkan atribut multiple disini -->
                 <input type="file" name="fotos[]" class="hidden" accept="image/jpeg, image/png, image/jpg" multiple onchange="this.form.submit()">
             </label>
         </form>
 
-        <!-- 3. Indikator Jumlah Foto Dinamis -->
+        <!-- 3. Indikator Jumlah Foto Dinamis (Menggunakan Safe Null Coalescing) -->
         <div class="h-40 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-xs font-semibold">
-            {{ $subPosko && $subPosko->fotos ? '+' . $subPosko->fotos->count() . ' Foto' : '0 Foto' }}
+            {{ isset($subPosko->fotos) && count($subPosko->fotos) > 0 ? '+' . count($subPosko->fotos) . ' Foto' : '0 Foto' }}
         </div>
     </div>
 </div>
 
 <script>
-// (Script openLightbox / closeLightbox bawaan kamu yang sudah ada tetap dipertahankan di sini atau di layout)
 if (typeof window.openLightbox !== 'function') {
     window.openLightbox = function (src, fileName) {
         let modal = document.getElementById('lightboxModal');

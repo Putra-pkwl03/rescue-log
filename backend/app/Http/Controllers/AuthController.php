@@ -26,28 +26,21 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Pengalihan berdasarkan Role
             $user = Auth::user();
             
-            // if ($user->role === 'admin') {
-            //     return redirect()->intended('/dashboard/admin');
-            // } elseif ($user->role === 'koordinator_komando') {
-            //     return redirect()->intended('/dashboard/komando');
-            // } else {
-            //     return redirect()->intended('/dashboard/lapangan');
-            // }
-
+            // Pengalihan berdasarkan Role + Flash Message
             if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-                }
-
-                elseif ($user->role === 'koordinator_komando') {
-                    return redirect()->route('komando.dashboard');
-                }
-
-                elseif ($user->role === 'lapangan') {
-                    return redirect()->route('lapangan.dashboard');
-                }
+                return redirect()->intended(route('admin.dashboard'))
+                    ->with('success', 'Berhasil login! Selamat datang di Dashboard Admin.');
+            } 
+            elseif ($user->role === 'koordinator_komando') {
+                return redirect()->intended(route('komando.dashboard'))
+                    ->with('success', 'Berhasil login! Selamat datang di Posko Komando.');
+            } 
+            elseif ($user->role === 'lapangan') {
+                return redirect()->intended(route('lapangan.dashboard'))
+                    ->with('success', 'Berhasil login! Selamat datang di Posko Lapangan.');
+            }
         }
 
         // Jika login gagal

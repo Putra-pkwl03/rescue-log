@@ -7,17 +7,22 @@ use App\Models\Bencana;
 use App\Models\Posko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class SubPoskoController extends Controller
 {
     public function index(Request $request)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
-        // Query Data Sub-Posko dengan Filter Search
-        $query = Posko::with('bencana')
-            ->where('parent_id', $komandoPoskoId)
+        if (!$komandoPoskoId) {
+            return back()->with('error', 'Akun Anda belum terhubung dengan Posko Utama.');
+        }
+
+        $baseQuery = Posko::where('parent_id', $komandoPoskoId)
             ->where('tipe_posko', 'lapangan_kecil');
+
+        $query = (clone $baseQuery)->with('bencana');
 
         if ($request->filled('search')) {
             $query->where('nama_posko', 'like', '%' . $request->search . '%');
@@ -27,15 +32,13 @@ class SubPoskoController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Pagination 5 data per halaman
         $subPoskos = $query->latest()->paginate(5)->withQueryString();
 
-        // Data Statistik untuk Header Cards & Sidebar Widget
-        $totalPosko = Posko::where('parent_id', $komandoPoskoId)->where('tipe_posko', 'lapangan_kecil')->count();
-        $poskoAktif = Posko::where('parent_id', $komandoPoskoId)->where('tipe_posko', 'lapangan_kecil')->where('status', 'aktif')->count();
-        $poskoSiaga = Posko::where('parent_id', $komandoPoskoId)->where('tipe_posko', 'lapangan_kecil')->where('status', 'siaga')->count();
-        $poskoNonaktif = Posko::where('parent_id', $komandoPoskoId)->where('tipe_posko', 'lapangan_kecil')->where('status', 'nonaktif')->count();
-        $totalPetugas = Posko::where('parent_id', $komandoPoskoId)->where('tipe_posko', 'lapangan_kecil')->sum('jumlah_petugas') ?? 0;
+        $totalPosko    = (clone $baseQuery)->count();
+        $poskoAktif    = (clone $baseQuery)->where('status', 'aktif')->count();
+        $poskoSiaga    = (clone $baseQuery)->where('status', 'siaga')->count();
+        $poskoNonaktif = (clone $baseQuery)->where('status', 'nonaktif')->count();
+        $totalPetugas  = (clone $baseQuery)->sum('jumlah_petugas') ?? 0;
 
         return view('dashboard.komando.posko-kecil.index', compact(
             'subPoskos', 
@@ -55,7 +58,11 @@ class SubPoskoController extends Controller
 
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
+
+        if (!$user->posko_id) {
+            return back()->with('error', 'Gagal membuat Sub-Posko. Anda tidak memiliki Posko Induk.');
+        }
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
@@ -98,7 +105,7 @@ class SubPoskoController extends Controller
 
     public function show($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
         $subPosko = Posko::with(['bencana', 'users'])
             ->where('parent_id', $komandoPoskoId)
@@ -109,7 +116,7 @@ class SubPoskoController extends Controller
 
     public function edit($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
 
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
         $bencanaAktif = Bencana::where('status', 'sedang_berjalan')->get();
@@ -119,13 +126,14 @@ class SubPoskoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
             'bencana_id'       => 'required|exists:bencana,id',
             'penanggung_jawab' => 'required|string|max:255',
+            'status'           => 'required|in:aktif,siaga,nonaktif',
             'kontak_hp'        => 'nullable|string|max:20',
             'jumlah_petugas'   => 'nullable|integer|min:0',
             'lokasi'           => 'nullable|string',
@@ -149,7 +157,7 @@ class SubPoskoController extends Controller
 
     public function destroy($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
 
         if ($subPosko->foto && Storage::disk('public')->exists($subPosko->foto)) {
@@ -164,8 +172,7 @@ class SubPoskoController extends Controller
 
     public function regenerateCode($id)
     {
-        $komandoPoskoId = auth()->user()->posko_id;
-
+        $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
         $subPosko->update([
             'kode_undangan' => Posko::generateKodeUndangan(),

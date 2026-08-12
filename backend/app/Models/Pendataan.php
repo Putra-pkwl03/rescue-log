@@ -9,6 +9,9 @@ class Pendataan extends Model
 {
     use HasFactory;
 
+    // Menentukan nama tabel persis sesuai di PostgreSQL
+    protected $table = 'pendataan';
+
     protected $guarded = ['id'];
 
     public function user()
