@@ -1,108 +1,346 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen & Verifikasi Logistik')
+@section('title', 'Data Logistik & Pengajuan')
 
 @section('content')
-<div class="space-y-6">
-    {{-- Header Halaman --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Verifikasi & Stok Logistik</h1>
-            <p class="text-xs font-medium text-slate-500 mt-0.5">Kelola pengajuan logistik dari posko lapangan dan pantau ketersediaan barang.</p>
+<!-- JUDUL & PENJELASAN HALAMAN -->
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-gray-900">Data Logistik & Pengajuan</h1>
+    <p class="text-base text-gray-700 mt-2">Kelola, pantau, dan konfirmasi pengajuan kebutuhan logistik dari posko-posko lapangan.</p>
+</div>
+
+<!-- ALERT NOTIFIKASI SUCCESS -->
+@if(session('success'))
+    <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+            <span>{{ session('success') }}</span>
         </div>
+        <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
     </div>
+@endif
 
-    {{-- Ringkasan Stok Logistik via Komponen stat-card --}}
-    <x-stat-card :subPosko="$subPosko ?? null" />
+<!-- BANNER AI PREDIKSI STOK LOGISTIK -->
+<div class="relative overflow-hidden bg-linear-to-r from-blue-700 via-indigo-700 to-blue-800 rounded-2xl p-6 text-white shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
 
-    {{-- CARD 1: Filter & Header Informasi --}}
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-start gap-4 z-10">
+        <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-amber-300">
+            <i data-lucide="cpu" class="w-6 h-6"></i>
+        </div>
         <div>
-            <h3 class="text-base font-bold text-slate-800">Daftar Pengajuan Logistik</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Daftar pengajuan kebutuhan masuk dari Posko Lapangan</p>
+            <h2 class="text-xl font-bold tracking-tight">AI Prediksi Stok Logistik <span class="text-xs bg-amber-400 text-slate-900 px-2 py-0.5 rounded-md uppercase font-extrabold ml-2">Aktif</span></h2>
+            <p class="text-blue-100 text-sm leading-relaxed max-w-3xl mt-1">
+                Sistem Machine Learning memantau tren pengajuan dari seluruh posko lapangan secara real-time untuk memastikan akurasi distribusi logistik bantuan bencana.
+            </p>
         </div>
-
-        {{-- Filter Status Dropdown --}}
-        <form action="{{ route('komando.logistik.index') }}" method="GET" class="w-full md:w-auto">
-            <div class="relative w-full md:w-56 flex items-center">
-                <select name="status" onchange="this.form.submit()" 
-                    class="peer w-full text-xs font-medium bg-slate-50 hover:bg-white border border-slate-200 rounded-xl pl-3.5 pr-9 py-2.5 text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none appearance-none cursor-pointer shadow-sm">
-                    <option value="">Semua Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="disetujui_sebagian" {{ request('status') == 'disetujui_sebagian' ? 'selected' : '' }}>Disetujui Sebagian</option>
-                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                </select>
-                
-                <!-- Ikon Panah SVG Berputar Saat Focus/Diklik -->
-                <div class="absolute right-3.5 pointer-events-none text-slate-400 transition-transform duration-200 origin-center peer-focus:rotate-180">
-                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    {{-- CARD 2: Tabel Pengajuan Logistik --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-300 border-b border-slate-100">
-                    <tr>
-                        <th class="px-6 py-3.5 font-medium text-slate-900 uppercase tracking-wider text-[11px]">Kode & Tanggal</th>
-                        <th class="px-6 py-3.5 font-medium text-slate-900 uppercase tracking-wider text-[11px]">Posko Lapangan</th>
-                        <th class="px-6 py-3.5 font-medium text-slate-900 uppercase tracking-wider text-[11px]">Kejadian Bencana</th>
-                        <th class="px-6 py-3.5 font-medium text-slate-900 uppercase tracking-wider text-[11px] text-center">Status</th>
-                        <th class="px-6 py-3.5 font-medium text-slate-900 uppercase tracking-wider text-[11px] text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($pengajuans as $pengajuan)
-                    <tr class="hover:bg-slate-50/60 transition-colors">
-                        <td class="px-6 py-4">
-                            <span class="font-bold text-blue-600 block text-xs">#{{ $pengajuan->kode_pengajuan }}</span>
-                            <span class="text-[11px] text-slate-400 font-medium">{{ \Carbon\Carbon::parse($pengajuan->tanggal_pengajuan)->translatedFormat('d M Y, H:i') }}</span>
-                        </td>
-                        <td class="px-6 py-4 font-semibold text-slate-700">
-                            {{ $pengajuan->posko->nama_posko ?? '-' }}
-                        </td>
-                        <td class="px-6 py-4 font-medium text-slate-600">
-                            {{ $pengajuan->bencana->jenis_bencana ?? '-' }}
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <x-status-badge :status="$pengajuan->status" />
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <button type="button" 
-                                onclick="openModalVerifikasi({{ $pengajuan->id }})"
-                                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all active:scale-95">
-                                <i class="bi {{ $pengajuan->status === 'pending' ? 'bi-shield-check text-blue-600' : 'bi-eye text-slate-500' }}"></i>
-                                <span>{{ $pengajuan->status === 'pending' ? 'Verifikasi' : 'Detail' }}</span>
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-16 text-center">
-                            <div class="w-12 h-12 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                <i class="bi bi-inbox text-2xl"></i>
-                            </div>
-                            <p class="text-xs font-bold text-slate-600">Belum Ada Pengajuan</p>
-                            <p class="text-[11px] text-slate-400 mt-1">Tidak ada pengajuan logistik yang ditemukan untuk filter saat ini.</p>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Pagination --}}
-        @if($pengajuans->hasPages())
-        <div class="p-4 border-t border-slate-100 bg-slate-50/20">
-            {{ $pengajuans->links() }}
-        </div>
-        @endif
     </div>
 </div>
+
+<!-- 4 KOTAK STATISTIK RINGKASAN DATA -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-6">
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Total Pengajuan</p>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->total() }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+            <i data-lucide="box" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Disetujui</p>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'approved')->count() }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Menunggu ACC</p>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'pending')->count() }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Ditolak</p>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'rejected')->count() }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+            <i data-lucide="x-circle" class="w-6 h-6"></i>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER & PENCARIAN -->
+<form method="GET" action="{{ route('komando.logistik.index') }}" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 my-6">
+    <div class="flex flex-wrap items-center gap-3 flex-1">
+        <div class="relative min-w-70 flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </span>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor pengajuan atau posko..." class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500">
+        </div>
+
+        <select name="status" class="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none cursor-pointer">
+            <option value="">Semua Status</option>
+            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
+            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui Full</option>
+            <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Disetujui Sebagian</option>
+            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+        </select>
+    </div>
+
+    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
+        <i data-lucide="filter" class="w-4 h-4"></i>
+        Filter Data
+    </button>
+</form>
+
+<!-- TABEL DATA PENGAJUAN -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                    <th class="py-4 px-6">No. Pengajuan</th>
+                    <th class="py-4 px-6">Posko Lapangan</th>
+                    <th class="py-4 px-6">Waktu Pengajuan</th>
+                    <th class="py-4 px-6">Status</th>
+                    <th class="py-4 px-6">Ringkasan Kebutuhan</th>
+                    <th class="py-4 px-6 text-right">Aksi Konfirmasi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-sm text-slate-700">
+                @forelse($pengajuans as $item)
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <td class="py-4 px-6 font-bold text-slate-900">
+                            {{ $item->kode_pengajuan }}
+                        </td>
+
+                        <td class="py-4 px-6">
+                            <div class="font-semibold text-slate-900">{{ $item->user->name ?? 'Posko Lapangan' }}</div>
+                            <div class="text-xs text-slate-500">{{ $item->user->email ?? '-' }}</div>
+                        </td>
+
+                        <td class="py-4 px-6">
+                            <div class="font-medium">{{ $item->created_at->format('d M Y') }}</div>
+                            <div class="text-xs text-slate-500">{{ $item->created_at->format('H:i') }} WIB</div>
+                        </td>
+
+                        <td class="py-4 px-6">
+                            @if($item->status == 'pending')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> Menunggu ACC
+                                </span>
+                            @elseif($item->status == 'approved')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Disetujui Full
+                                </span>
+                            @elseif($item->status == 'partial')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
+                                    <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> Sebagian
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 rounded-full">
+                                    <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Ditolak
+                                </span>
+                            @endif
+                        </td>
+
+                        <td class="py-4 px-6">
+                            <div class="flex flex-wrap gap-1.5 text-xs">
+                                @if($item->beras_kg > 0)
+                                    <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium">Beras: {{ $item->beras_kg }} kg</span>
+                                @endif
+                                @if($item->air_minum_dus > 0)
+                                    <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium">Air: {{ $item->air_minum_dus }} Dus</span>
+                                @endif
+                                @if($item->makanan_kaleng_pack > 0)
+                                    <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium">Mkn Kaleng: {{ $item->makanan_kaleng_pack }} Pk</span>
+                                @endif
+                                <button onclick="openDetailModal(
+                                    '{{ $item->kode_pengajuan }}', 
+                                    '{{ $item->user->name ?? 'Posko Lapangan' }}', 
+                                    '{{ $item->created_at->format('d M Y, H:i') }} WIB', 
+                                    '{{ $item->beras_kg ?? 0 }}', 
+                                    '{{ $item->makanan_kaleng_pack ?? 0 }}',
+                                    '{{ $item->makanan_bayi_pack ?? 0 }}',
+                                    '{{ $item->minyak_goreng_liter ?? 0 }}',
+                                    '{{ $item->air_minum_dus ?? 0 }}',
+                                    '{{ $item->popok_bayi_pcs ?? 0 }}',
+                                    '{{ $item->popok_dewasa_pcs ?? 0 }}',
+                                    '{{ $item->pembalut_wanita_pack ?? 0 }}',
+                                    '{{ $item->hygiene_kit_paket ?? 0 }}',
+                                    '{{ $item->selimut_pcs ?? 0 }}',
+                                    '{{ $item->matras_terpal_pcs ?? 0 }}',
+                                    '{{ $item->obat_p3k_paket ?? 0 }}',
+                                    '{{ $item->catatan_posko ?? '-' }}'
+                                )" class="text-blue-600 hover:text-blue-800 font-bold px-1.5 py-1 text-xs inline-flex items-center gap-0.5 cursor-pointer">
+                                    Detail <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </td>
+
+                        <td class="py-4 px-6 text-right">
+                            @if($item->status == 'pending')
+                                <button type="button" 
+                                    onclick="openActionModal(
+                                        '{{ $item->id }}', 
+                                        '{{ $item->kode_pengajuan }}', 
+                                        '{{ $item->user->name ?? 'Posko Lapangan' }}',
+                                        '{{ route('komando.logistik.approve', $item->id) }}',
+                                        '{{ route('komando.logistik.reject', $item->id) }}',
+                                        {{ json_encode($item) }}
+                                    )" 
+                                    class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer">
+                                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                                    <span>Proses Aksi</span>
+                                </button>
+                            @else
+                                <span class="text-xs text-slate-400 italic">Selesai Diproses</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="py-12 px-6 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center space-y-2">
+                                <i data-lucide="inbox" class="w-10 h-10 text-slate-300"></i>
+                                <p class="text-sm font-medium">Belum ada data pengajuan logistik dari posko lapangan.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="p-4 border-t border-slate-200 bg-slate-50">
+        {{ $pengajuans->links() }}
+    </div>
+</div>
+
+<!-- MEMANGGIL KOMPONEN MODAL -->
+<x-komando.logistik.action-modal />
+<x-komando.logistik.partial-modal />
+<x-komando.logistik.detail-modal />
+
+<!-- SCRIPT PENGENDALI MODAL -->
+<script>
+    let activeItemData = null;
+
+    // --- MODAL PROSES AKSI TERPUSAT ---
+    function openActionModal(id, kode, poskoNama, approveUrl, rejectUrl, itemData) {
+        activeItemData = itemData;
+
+        const modal = document.getElementById('actionModal');
+        document.getElementById('actionModalSubtitle').innerText = `No: ${kode} (${poskoNama})`;
+
+        document.getElementById('formApproveFull').action = approveUrl;
+        document.getElementById('formReject').action = rejectUrl;
+
+        modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeActionModal() {
+        document.getElementById('actionModal').classList.add('hidden');
+    }
+
+    function switchToPartialModal() {
+        closeActionModal();
+        if (activeItemData) {
+            openPartialModal(activeItemData);
+        }
+    }
+
+    // --- MODAL SETUJUI SEBAGIAN ---
+    function openPartialModal(item) {
+        const modal = document.getElementById('partialModal');
+        const form = document.getElementById('partialForm');
+        const subTitle = document.getElementById('modalSubTitle');
+        
+        form.action = `/komando/logistik/${item.id}/approve-partial`;
+        subTitle.innerText = `Nomor Pengajuan: ${item.kode_pengajuan}`;
+        
+        // Mengisi nilai awal seluruh 12 item secara otomatis
+        if(document.getElementById('part_beras_kg')) document.getElementById('part_beras_kg').value = item.beras_kg || 0;
+        if(document.getElementById('part_makanan_kaleng_pack')) document.getElementById('part_makanan_kaleng_pack').value = item.makanan_kaleng_pack || 0;
+        if(document.getElementById('part_makanan_bayi_pack')) document.getElementById('part_makanan_bayi_pack').value = item.makanan_bayi_pack || 0;
+        if(document.getElementById('part_minyak_goreng_liter')) document.getElementById('part_minyak_goreng_liter').value = item.minyak_goreng_liter || 0;
+        if(document.getElementById('part_air_minum_dus')) document.getElementById('part_air_minum_dus').value = item.air_minum_dus || 0;
+        if(document.getElementById('part_popok_bayi_pcs')) document.getElementById('part_popok_bayi_pcs').value = item.popok_bayi_pcs || 0;
+        if(document.getElementById('part_popok_dewasa_pcs')) document.getElementById('part_popok_dewasa_pcs').value = item.popok_dewasa_pcs || 0;
+        if(document.getElementById('part_pembalut_wanita_pack')) document.getElementById('part_pembalut_wanita_pack').value = item.pembalut_wanita_pack || 0;
+        if(document.getElementById('part_hygiene_kit_paket')) document.getElementById('part_hygiene_kit_paket').value = item.hygiene_kit_paket || 0;
+        if(document.getElementById('part_selimut_pcs')) document.getElementById('part_selimut_pcs').value = item.selimut_pcs || 0;
+        if(document.getElementById('part_matras_terpal_pcs')) document.getElementById('part_matras_terpal_pcs').value = item.matras_terpal_pcs || 0;
+        if(document.getElementById('part_obat_p3k_paket')) document.getElementById('part_obat_p3k_paket').value = item.obat_p3k_paket || 0;
+
+        modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closePartialModal() {
+        document.getElementById('partialModal').classList.add('hidden');
+    }
+
+    // --- MODAL DETAIL PENGAJUAN LOGISTIK ---
+    function openDetailModal(kode, posko, waktu, beras, mknKaleng, mknBayi, minyak, air, popokBayi, popokDewasa, pembalut, hygiene, selimut, matras, obat, catatan) {
+        const modal = document.getElementById('detailModal');
+        
+        document.getElementById('detailKodePengajuan').innerText = `No. Pengajuan: ${kode}`;
+        document.getElementById('detailPoskoNama').innerText = posko;
+        document.getElementById('detailWaktu').innerText = waktu;
+
+        const tbody = document.getElementById('detailTabelBarang');
+        tbody.innerHTML = `
+            <tr><td class="p-2.5">Beras</td><td class="p-2.5 text-right font-bold text-slate-900">${beras} Kg</td></tr>
+            <tr><td class="p-2.5">Makanan Kaleng</td><td class="p-2.5 text-right font-bold text-slate-900">${mknKaleng} Pack</td></tr>
+            <tr><td class="p-2.5">Makanan Bayi</td><td class="p-2.5 text-right font-bold text-slate-900">${mknBayi} Pack</td></tr>
+            <tr><td class="p-2.5">Minyak Goreng</td><td class="p-2.5 text-right font-bold text-slate-900">${minyak} Liter</td></tr>
+            <tr><td class="p-2.5">Air Minum</td><td class="p-2.5 text-right font-bold text-slate-900">${air} Dus</td></tr>
+            <tr><td class="p-2.5">Popok Bayi</td><td class="p-2.5 text-right font-bold text-slate-900">${popokBayi} Pcs</td></tr>
+            <tr><td class="p-2.5">Popok Dewasa</td><td class="p-2.5 text-right font-bold text-slate-900">${popokDewasa} Pcs</td></tr>
+            <tr><td class="p-2.5">Pembalut Wanita</td><td class="p-2.5 text-right font-bold text-slate-900">${pembalut} Pack</td></tr>
+            <tr><td class="p-2.5">Hygiene Kit</td><td class="p-2.5 text-right font-bold text-slate-900">${hygiene} Paket</td></tr>
+            <tr><td class="p-2.5">Selimut</td><td class="p-2.5 text-right font-bold text-slate-900">${selimut} Pcs</td></tr>
+            <tr><td class="p-2.5">Matras / Terpal</td><td class="p-2.5 text-right font-bold text-slate-900">${matras} Pcs</td></tr>
+            <tr><td class="p-2.5">Obat P3K</td><td class="p-2.5 text-right font-bold text-slate-900">${obat} Paket</td></tr>
+        `;
+
+        if(catatan && catatan !== '-') {
+            tbody.innerHTML += `
+                <tr class="bg-slate-50"><td colspan="2" class="p-2.5 text-xs text-slate-600">
+                    <span class="font-bold text-slate-800">Catatan Posko:</span> ${catatan}
+                </td></tr>
+            `;
+        }
+
+        modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    // Inisialisasi ikon Lucide
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
 @endsection

@@ -9,8 +9,7 @@ use App\Http\Controllers\Lapangan;
 use App\Http\Controllers\Admin\StokInventarisController;
 use App\Http\Controllers\Admin\DistribusiController;
 use App\Http\Controllers\PredictionController;
-
-// Import Controller Role Komando
+use App\Http\Controllers\Komando\KomandoDistribusiController;
 use App\Http\Controllers\Komando\PengajuanKebutuhanController;
 use App\Http\Controllers\Komando\PengirimanController;
 use App\Http\Controllers\Komando\ArmadaController;
@@ -90,15 +89,17 @@ Route::middleware('auth')->group(function () {
         // Dashboard Komando
         Route::get('/dashboard', [Komando\DashboardController::class, 'index'])->name('dashboard');
 
-        // Menu 2: Data Logistik Masuk (Verifikasi & Persetujuan Pengajuan dari Posko Lapangan)
-        Route::get('/logistik', [PengajuanKebutuhanController::class, 'logistikMasuk'])->name('logistik.index');
-        Route::patch('/logistik/{id}/status', [PengajuanKebutuhanController::class, 'updateStatusLogistik'])->name('logistik.update-status');
+        // Verifikasi & Persetujuan Pengajuan Logistik dari Posko Lapangan
+        Route::get('/logistik', [Komando\KomandoLogistikController::class, 'index'])->name('logistik.index');
+        Route::match(['get', 'post'], '/logistik/{id}/approve', [Komando\KomandoLogistikController::class, 'approve'])->name('logistik.approve');
+        Route::match(['get', 'post'], '/logistik/{id}/approve-partial', [Komando\KomandoLogistikController::class, 'approvePartial'])->name('logistik.approve-partial');
+        Route::match(['get', 'post'], '/logistik/{id}/reject', [Komando\KomandoLogistikController::class, 'reject'])->name('logistik.reject');
 
         // Master Data Armada (Kendaraan & Driver)
         Route::resource('armada', ArmadaController::class)->except(['create', 'edit', 'show']);
 
-        // Menu 3: Distribusi Logistik & Rute Peta
-        Route::get('/distribusi', [PengirimanController::class, 'index'])->name('distribusi.index');
+        // Distribusi Logistik & Rute Peta Komando
+        Route::get('/distribusi', [KomandoDistribusiController::class, 'index'])->name('distribusi.index');
         Route::post('/distribusi', [PengirimanController::class, 'store'])->name('distribusi.store');
         Route::patch('/distribusi/{id}/status', [PengirimanController::class, 'updateStatus'])->name('distribusi.update-status');
 
@@ -130,6 +131,6 @@ Route::middleware('auth')->group(function () {
 
         // Status Distribusi & Stok
         Route::get('/stok', [Lapangan\StokController::class, 'index'])->name('stok.index');
-        Route::post('/stok/konfirmasi/{id}', [Lapangan\StokController::class, 'konfirmasiSampai'])->name('stok.konfirmasi');
+        Route::post('/stok/{id}/konfirmasi', [Lapangan\StokController::class, 'konfirmasiSampai'])->name('stok.konfirmasi');
     });
 });

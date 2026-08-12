@@ -13,23 +13,39 @@ class PengirimanInventaris extends Model
     protected $table = 'pengiriman_inventaris';
 
     protected $fillable = [
+        'pengajuan_id',       // Tambahan: Menghubungkan ke tabel pengajuan
         'stok_inventaris_id',
         'posko_id',
         'user_id',
         'jumlah_dikirim',
+        'status_distribusi',  // Tambahan: 'Dalam Pengiriman', 'Diterima di Posko'
+        'estimasi_waktu',     // Tambahan: Teks estimasi waktu sampai
+        'waktu_diterima',     // Tambahan: Timestamp saat konfirmasi
         'keterangan',
     ];
+
+    protected $casts = [
+        'waktu_diterima' => 'datetime',
+    ];
+
+    /**
+     * Relasi ke Pengajuan Logistik
+     */
+    public function pengajuan()
+    {
+        return $this->belongsTo(Pengajuan::class, 'pengajuan_id');
+    }
 
     /**
      * Relasi ke Stok Inventaris (Barang Gudang)
      */
     public function stokInventaris()
     {
-        return $table = $this->belongsTo(StokInventaris::class, 'stok_inventaris_id');
+        return $this->belongsTo(StokInventaris::class, 'stok_inventaris_id');
     }
 
     /**
-     * Relasi ke Posko Komando
+     * Relasi ke Posko
      */
     public function posko()
     {
@@ -37,7 +53,7 @@ class PengirimanInventaris extends Model
     }
 
     /**
-     * Relasi ke User (Petugas Pengirim)
+     * Relasi ke User (Petugas Lapangan / Pengirim)
      */
     public function user()
     {
@@ -51,7 +67,6 @@ class PengirimanInventaris extends Model
      */
     public function canBeEditedOrDeleted(): bool
     {
-        // Mengembalikan true jika selisih created_at dengan waktu sekarang kurang dari atau sama dengan 20 menit
         return $this->created_at->addMinutes(20)->isFuture();
     }
 
