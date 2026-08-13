@@ -8,6 +8,7 @@ use App\Models\Posko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class SubPoskoController extends Controller
 {
@@ -66,13 +67,16 @@ class SubPoskoController extends Controller
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
-            'bencana_id'       => 'required|exists:bencana,id',
+            'bencana_id'       => [
+                'required',
+                Rule::exists('bencana', 'id')->where(fn ($q) => $q->where('status', 'sedang_berjalan'))
+            ],
             'penanggung_jawab' => 'required|string|max:255',
             'kontak_hp'        => 'nullable|string|max:20',
             'jumlah_petugas'   => 'nullable|integer|min:0',
             'lokasi'           => 'nullable|string',
-            'latitude'         => 'nullable|numeric',
-            'longitude'        => 'nullable|numeric',
+            'latitude'         => 'nullable|numeric|between:-90,90',
+            'longitude'        => 'nullable|numeric|between:-180,180',
             'foto'             => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ]);
 
@@ -81,14 +85,13 @@ class SubPoskoController extends Controller
             $fotoPath = $request->file('foto')->store('posko-images', 'public');
         }
 
-        $kodeUndangan = Posko::generateKodeUndangan();
-
+        // Tidak perlu memanggil Posko::generateKodeUndangan() di sini
+        // Kode undangan otomatis terisi melalui event booted() di model Posko
         $subPosko = Posko::create([
             'nama_posko'       => $validated['nama_posko'],
             'tipe_posko'       => 'lapangan_kecil',
             'parent_id'        => $user->posko_id, 
             'bencana_id'       => $validated['bencana_id'],
-            'kode_undangan'    => $kodeUndangan,
             'penanggung_jawab' => $validated['penanggung_jawab'],
             'kontak_hp'        => $validated['kontak_hp'] ?? null,
             'jumlah_petugas'   => $validated['jumlah_petugas'] ?? 0,
@@ -100,7 +103,7 @@ class SubPoskoController extends Controller
         ]);
 
         return redirect()->route('komando.posko-kecil.index')
-            ->with('success', "Sub-Posko '{$subPosko->nama_posko}' berhasil didaftarkan. Kode Akses: {$kodeUndangan}");
+            ->with('success', "Sub-Posko '{$subPosko->nama_posko}' berhasil didaftarkan. Kode Akses: {$subPosko->kode_undangan}");
     }
 
     public function show($id)
@@ -131,14 +134,17 @@ class SubPoskoController extends Controller
 
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
-            'bencana_id'       => 'required|exists:bencana,id',
+            'bencana_id'       => [
+                'required',
+                Rule::exists('bencana', 'id')->where(fn ($q) => $q->where('status', 'sedang_berjalan'))
+            ],
             'penanggung_jawab' => 'required|string|max:255',
             'status'           => 'required|in:aktif,siaga,nonaktif',
             'kontak_hp'        => 'nullable|string|max:20',
             'jumlah_petugas'   => 'nullable|integer|min:0',
             'lokasi'           => 'nullable|string',
-            'latitude'         => 'nullable|numeric',
-            'longitude'        => 'nullable|numeric',
+            'latitude'         => 'nullable|numeric|between:-90,90',
+            'longitude'        => 'nullable|numeric|between:-180,180',
             'foto'             => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ]);
 
@@ -174,6 +180,7 @@ class SubPoskoController extends Controller
     {
         $komandoPoskoId = Auth::user()->posko_id;
         $subPosko = Posko::where('parent_id', $komandoPoskoId)->findOrFail($id);
+        
         $subPosko->update([
             'kode_undangan' => Posko::generateKodeUndangan(),
         ]);
