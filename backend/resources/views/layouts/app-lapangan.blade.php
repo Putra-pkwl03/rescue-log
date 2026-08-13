@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', config('app.name', 'RESCUE-LOG')) - Posko Lapangan</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <!-- Favicon (Ikon di Tab Browser) -->
+    <link rel="icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
 
     <!-- Tailwind CSS (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
