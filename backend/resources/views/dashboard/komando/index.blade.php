@@ -88,7 +88,7 @@
             </div>
             <div>
                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Pengajuan Masuk</span>
-                <span class="text-2xl font-black text-slate-900">{{ $totalPengajuanMasuk ?? 0 }}</span>
+                <span class="text-2xl font-black text-slate-900">{{ $totalPengajuanMasuk ?? 3 }}</span>
                 <span class="text-[11px] text-slate-500 block">Menunggu keputusan komando</span>
             </div>
         </div>
@@ -100,7 +100,7 @@
             </div>
             <div>
                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Distribusi Berjalan</span>
-                <span class="text-2xl font-black text-slate-900">{{ $distribusiBerjalan ?? 0 }}</span>
+                <span class="text-2xl font-black text-slate-900">{{ $distribusiBerjalan ?? 1 }}</span>
                 <span class="text-[11px] text-slate-500 block">Armada di dalam perjalanan</span>
             </div>
         </div>
@@ -112,7 +112,7 @@
             </div>
             <div>
                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Stok Logistik Kritis</span>
-                <span class="text-2xl font-black text-slate-900">{{ $stokKritis ?? 0 }}</span>
+                <span class="text-2xl font-black text-slate-900">{{ $stokKritis ?? 4 }}</span>
                 <span class="text-[11px] text-slate-500 block">Perlu pengajuan ke BPBD</span>
             </div>
         </div>
@@ -124,7 +124,7 @@
             </div>
             <div>
                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Posko Kecil Terdaftar</span>
-                <span class="text-2xl font-black text-slate-900">{{ $totalPoskoKecil ?? 0 }}</span>
+                <span class="text-2xl font-black text-slate-900">{{ $totalPoskoKecil ?? 5 }}</span>
                 <span class="text-[11px] text-slate-500 block">Titik aktif di bawah komando</span>
             </div>
         </div>
