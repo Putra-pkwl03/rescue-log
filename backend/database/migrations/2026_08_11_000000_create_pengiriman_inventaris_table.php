@@ -31,8 +31,8 @@ return new class extends Migration
                   ->constrained('poskos')
                   ->onDelete('cascade');
 
-            // Detail pengiriman (Menggunakan float untuk pecahan)
-            $table->float('jumlah_dikirim')->default(0);
+            // Gunakan decimal(10, 2) untuk presisi PostgreSQL yang optimal
+            $table->decimal('jumlah_dikirim', 10, 2)->default(0);
             
             $table->string('status_distribusi')->default('Dalam Pengiriman');
             $table->string('estimasi_waktu')->nullable();

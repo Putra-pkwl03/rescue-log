@@ -11,7 +11,7 @@
             </x-sub-posko.page-header>
         </div>
         <div class="mt-4 sm:mt-0 flex gap-3">
-            <button type="submit" form="form-pengajuan" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm">
+            <button type="submit" form="form-pengajuan" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition shadow-sm cursor-pointer">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
@@ -30,14 +30,14 @@
                     </svg>
                     Data Acuan AI Posko
                 </div>
-                <h2 class="text-xl font-bold">Total {{ $pendataan->total_pengungsi }} Pengungsi</h2>
+                <h2 class="text-xl font-bold">Total {{ $pendataan->total_pengungsi ?? 0 }} Pengungsi</h2>
                 <p class="text-xs text-blue-200 mt-1">
-                    Balita: {{ $pendataan->balita }} | Lansia: {{ $pendataan->lansia }} | Ibu Hamil: {{ $pendataan->ibu_hamil }} | Disabilitas: {{ $pendataan->disabilitas }} | Tempat: {{ $pendataan->tipe_tempat }}
+                    Balita: {{ $pendataan->balita ?? 0 }} | Lansia: {{ $pendataan->lansia ?? 0 }} | Ibu Hamil: {{ $pendataan->ibu_hamil ?? 0 }} | Disabilitas: {{ $pendataan->disabilitas ?? 0 }} | Tempat: {{ $pendataan->tipe_tempat ?? '-' }}
                 </p>
             </div>
             <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-lg border border-white/10 text-right">
                 <div class="text-xs text-blue-200">Kondisi BMKG</div>
-                <div class="font-bold text-sm">{{ $pendataan->cuaca }} ({{ $pendataan->suhu_celcius }}°C)</div>
+                <div class="font-bold text-sm">{{ $pendataan->cuaca ?? '-' }} ({{ $pendataan->suhu_celcius ?? 0 }}°C)</div>
             </div>
         </div>
     </div>
@@ -151,4 +151,40 @@
     </div>
 
 </div>
+
+<!-- CDN SWEETALERT2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- NOTIFIKASI SWEETALERT2 INTEGRATED -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('error'))
+            Swal.fire({
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                icon: 'error',
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#DC2626',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-sm'
+                }
+            });
+        @endif
+
+        @if(session('warning'))
+            Swal.fire({
+                title: 'Perhatian',
+                text: "{{ session('warning') }}",
+                icon: 'warning',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#D97706',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-bold text-sm'
+                }
+            });
+        @endif
+    });
+</script>
 @endsection

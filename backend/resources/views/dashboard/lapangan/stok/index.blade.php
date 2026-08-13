@@ -24,113 +24,122 @@
 
 <!-- MODAL POPUP COMPONENTS -->
 <x-sub-posko.distribusi.detail-modal />
-<x-sub-posko.distribusi.confirm-modal />
+
+<!-- FORM HIDDEN UNTUK EKSEKUSI KONFIRMASI TERIMA SEGERA -->
+<form id="directConfirmForm" method="POST" class="hidden">
+    @csrf
+</form>
 
 <!-- CDN SWEETALERT2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- JAVASCRIPT LOGIC -->
 <script>
-    // 1. POPUP SWEETALERT2 INTEGRATION
+    // 1. NOTIFIKASI TOAST SWEETALERT2 (POJOK KANAN ATAS)
     document.addEventListener('DOMContentLoaded', function () {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end', // Pojok Kanan Atas
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'rounded-xl shadow-lg border border-slate-100'
+            },
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
         @if(session('success'))
-            Swal.fire({
-                title: 'Berhasil Terkirim!',
-                text: "{{ session('success') }}",
+            Toast.fire({
                 icon: 'success',
-                confirmButtonText: 'Siap, Dipahami',
-                confirmButtonColor: '#2563EB',
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
-                }
+                title: "{{ session('success') }}"
             });
         @endif
 
         @if(session('error'))
-            Swal.fire({
-                title: 'Gagal!',
-                text: "{{ session('error') }}",
+            Toast.fire({
                 icon: 'error',
-                confirmButtonText: 'Tutup',
-                confirmButtonColor: '#DC2626',
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
-                }
+                title: "{{ session('error') }}"
             });
         @endif
 
         @if(session('warning'))
-            Swal.fire({
-                title: 'Perhatian',
-                text: "{{ session('warning') }}",
+            Toast.fire({
                 icon: 'warning',
-                confirmButtonText: 'Lanjutkan',
-                confirmButtonColor: '#D97706',
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
-                }
+                title: "{{ session('warning') }}"
             });
         @endif
     });
 
-    // 2. MODAL & CONFIRMATION LOGIC
+    // 2. FUNGSI JAVASCRIPT MODAL & EKSEKUSI TERIMA LANGSUNG SELESAI
     let activeConfirmRoute = '';
 
     function openDetailModal(kode, routeUrl, items, status, catatan) {
-        document.getElementById('modalKodePengajuan').innerText = kode;
+        const modalKode = document.getElementById('modalKodePengajuan');
+        if (modalKode) modalKode.innerText = kode;
+        
         activeConfirmRoute = routeUrl;
         
         const catatanContainer = document.getElementById('modalCatatanContainer');
-        if (catatan && catatan.trim() !== '') {
-            document.getElementById('modalCatatanText').innerText = catatan;
-            catatanContainer.classList.remove('hidden');
-        } else {
-            catatanContainer.classList.add('hidden');
+        if (catatanContainer) {
+            if (catatan && catatan.trim() !== '') {
+                document.getElementById('modalCatatanText').innerText = catatan;
+                catatanContainer.classList.remove('hidden');
+            } else {
+                catatanContainer.classList.add('hidden');
+            }
         }
 
         const tbody = document.getElementById('modalTableBody');
-        tbody.innerHTML = '';
+        if (tbody) {
+            tbody.innerHTML = '';
 
-        if (items && items.length > 0) {
-            items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50/80';
-                tr.innerHTML = `
-                    <td class="py-2.5 px-3 font-bold text-gray-900">${item.nama}</td>
-                    <td class="py-2.5 px-3 text-gray-500">${item.kategori}</td>
-                    <td class="py-2.5 px-3 text-right font-semibold text-blue-600">${item.jumlah}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } else {
-            tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 italic">Rincian item tidak tersedia</td></tr>`;
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50/80';
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 font-bold text-gray-900">${item.nama}</td>
+                        <td class="py-2.5 px-3 text-gray-500">${item.kategori}</td>
+                        <td class="py-2.5 px-3 text-right font-semibold text-blue-600">${item.jumlah}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400 italic">Rincian item tidak tersedia</td></tr>`;
+            }
         }
 
+        // Atur Tombol Terima Sekarang di Modal Detail
         const btnConfirm = document.getElementById('btnOpenConfirmModal');
-        if (routeUrl) {
-            btnConfirm.classList.remove('hidden');
-        } else {
-            btnConfirm.classList.add('hidden');
+        if (btnConfirm) {
+            if (routeUrl && status !== 'selesai') {
+                btnConfirm.classList.remove('hidden');
+                // Ubah onclick agar LANGSUNG memproses submit tanpa buka modal konfirmasi lagi
+                btnConfirm.setAttribute('onclick', 'submitTerimaLangsung()');
+            } else {
+                btnConfirm.classList.add('hidden');
+            }
         }
 
-        document.getElementById('detailLogistikModal').classList.remove('hidden');
+        const modalDetail = document.getElementById('detailLogistikModal');
+        if (modalDetail) modalDetail.classList.remove('hidden');
     }
 
     function closeDetailModal() {
-        document.getElementById('detailLogistikModal').classList.add('hidden');
+        const modalDetail = document.getElementById('detailLogistikModal');
+        if (modalDetail) modalDetail.classList.add('hidden');
     }
 
-    function showConfirmModal() {
+    // FUNGSI EKSEKUSI SEGERA KETIKA TOMBOL TERIMA DIKLIK
+    function submitTerimaLangsung() {
         if (!activeConfirmRoute) return;
-        document.getElementById('modalConfirmForm').action = activeConfirmRoute;
-        document.getElementById('customConfirmModal').classList.remove('hidden');
-    }
 
-    function closeConfirmModal() {
-        document.getElementById('customConfirmModal').classList.add('hidden');
+        const form = document.getElementById('directConfirmForm');
+        form.action = activeConfirmRoute;
+        form.submit(); // Langsung kirim form ke controller
     }
 </script>
 @endsection
