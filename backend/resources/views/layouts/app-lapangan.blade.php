@@ -16,6 +16,7 @@
     @stack('styles')
 </head>
 
+
 <body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Memanggil Navbar Khusus Pos Lapangan -->
