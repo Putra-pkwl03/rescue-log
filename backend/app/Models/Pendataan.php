@@ -9,15 +9,10 @@ class Pendataan extends Model
 {
     use HasFactory;
 
-    // Ubah menjadi 'pendataans' (plural) sesuai konvensi tabel di PostgreSQL
+    // Sesuaikan nama tabel agar sama persis dengan yang dibuat di Migration
     protected $table = 'pendataans';
 
     protected $guarded = ['id'];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function posko()
     {

@@ -35,7 +35,6 @@
 
 <!-- MODAL POPUP COMPONENTS -->
 <x-sub-posko.distribusi.detail-modal />
-
 <x-sub-posko.distribusi.confirm-modal />
 
 <!-- JAVASCRIPT LOGIC -->

@@ -14,27 +14,32 @@ return new class extends Migration
         Schema::create('pengiriman_inventaris', function (Blueprint $table) {
             $table->id();
 
+            // Relasi ke pengajuan kebutuhan
+            $table->foreignId('pengajuan_id')
+                  ->nullable()
+                  ->constrained('pengajuan_kebutuhan')
+                  ->onDelete('cascade');
+
             // Relasi ke barang stok gudang
             $table->foreignId('stok_inventaris_id')
+                  ->nullable()
                   ->constrained('stok_inventaris')
                   ->onDelete('cascade');
 
-            // Relasi ke posko komando tujuan (tabel poskos)
+            // Relasi ke posko tujuan
             $table->foreignId('posko_id')
                   ->constrained('poskos')
                   ->onDelete('cascade');
 
-            // Relasi ke user / petugas yang mencatat pengiriman
-            $table->foreignId('user_id')
-                  ->nullable()
-                  ->constrained('users')
-                  ->onDelete('set null');
-
-            // Detail pengiriman
-            $table->integer('jumlah_dikirim');
+            // Detail pengiriman (Menggunakan float untuk pecahan)
+            $table->float('jumlah_dikirim')->default(0);
+            
+            $table->string('status_distribusi')->default('Dalam Pengiriman');
+            $table->string('estimasi_waktu')->nullable();
+            $table->timestamp('waktu_diterima')->nullable();
             $table->text('keterangan')->nullable();
 
-            // Timestamps (created_at menjadi acuan batas 20 menit)
+            // Timestamps
             $table->timestamps();
         });
     }

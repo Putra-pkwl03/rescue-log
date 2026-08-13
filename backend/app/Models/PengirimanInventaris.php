@@ -16,7 +16,6 @@ class PengirimanInventaris extends Model
         'pengajuan_id',       // Tambahan: Menghubungkan ke tabel pengajuan
         'stok_inventaris_id',
         'posko_id',
-        'user_id',
         'jumlah_dikirim',
         'status_distribusi',  // Tambahan: 'Dalam Pengiriman', 'Diterima di Posko'
         'estimasi_waktu',     // Tambahan: Teks estimasi waktu sampai
@@ -25,16 +24,17 @@ class PengirimanInventaris extends Model
     ];
 
     protected $casts = [
-        'waktu_diterima' => 'datetime',
-    ];
+    'jumlah_dikirim' => 'double',
+    'waktu_diterima' => 'datetime',
+];
 
     /**
      * Relasi ke Pengajuan Logistik
      */
     public function pengajuan()
-    {
-        return $this->belongsTo(Pengajuan::class, 'pengajuan_id');
-    }
+{
+    return $this->belongsTo(PengajuanKebutuhan::class, 'pengajuan_id');
+}
 
     /**
      * Relasi ke Stok Inventaris (Barang Gudang)
