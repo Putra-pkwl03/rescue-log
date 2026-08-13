@@ -16,7 +16,7 @@ class PengungsiController extends Controller
         // Ambil posko_id dari user yang sedang login
         $poskoId = $user->posko_id;
 
-        // Query berdasarkan posko_id (Bukan user_id)
+        // Query berdasarkan posko_id
         $pendataan_terakhir = Pendataan::where('posko_id', $poskoId)
             ->latest()
             ->first();
@@ -38,24 +38,31 @@ class PengungsiController extends Controller
     {
         $user = Auth::user();
 
+        // Validasi seluruh inputan dari Modal Pendataan
         $validated = $request->validate([
-            'total_pengungsi' => 'required|integer|min:0',
-            'balita'           => 'nullable|integer|min:0',
-            'lansia'           => 'nullable|integer|min:0',
-            'ibu_hamil'        => 'nullable|integer|min:0',
-            'disabilitas'      => 'nullable|integer|min:0',
-            'tipe_tempat'      => 'nullable|string',
+            'total_pengungsi'  => 'required|integer|min:0',
+            'balita'           => 'required|integer|min:0',
+            'dewasa'           => 'required|integer|min:0',
+            'lansia'           => 'required|integer|min:0',
+            'ibu_hamil'        => 'required|integer|min:0',
+            'disabilitas'      => 'required|integer|min:0',
+            'tipe_tempat'      => 'required|string',
+            'akses_air'        => 'required|string',
+            'akses_jalan'      => 'required|string',
+            'lama_pengungsian' => 'required|integer|min:1',
             'cuaca'            => 'nullable|string',
             'suhu_celcius'     => 'nullable|numeric',
             'catatan'          => 'nullable|string',
         ]);
 
-        // Otomatis masukkan posko_id milik user yang sedang login
+        // Masukkan posko_id milik user yang sedang login
         $validated['posko_id'] = $user->posko_id;
 
+        // Simpan data pendataan baru ke database
         Pendataan::create($validated);
 
-        return redirect()->route('lapangan.pengungsi.index')
-            ->with('success', 'Data pengungsi berhasil diperbarui.');
+        // REDIRECT LANGSUNG KE HALAMAN PENGAJUAN LOGISTIK
+        return redirect()->route('lapangan.pengajuan.index')
+            ->with('success', 'Data pengungsi berhasil diperbarui! Hasil kalkulasi rekomendasi logistik AI telah disesuaikan.');
     }
 }

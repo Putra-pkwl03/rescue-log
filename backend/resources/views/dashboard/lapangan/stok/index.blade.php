@@ -14,17 +14,6 @@
         </a>
     </x-sub-posko.page-header>
 
-    <!-- ALERT SUCCESS NOTIFICATION -->
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 font-bold">&times;</button>
-        </div>
-    @endif
-
     <!-- TABEL STATUS PENGIRIMAN COMPONENT -->
     <x-sub-posko.distribusi.status-pengiriman-table :pengirimans="$pengirimans" />
 
@@ -37,8 +26,57 @@
 <x-sub-posko.distribusi.detail-modal />
 <x-sub-posko.distribusi.confirm-modal />
 
+<!-- CDN SWEETALERT2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- JAVASCRIPT LOGIC -->
 <script>
+    // 1. POPUP SWEETALERT2 INTEGRATION
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('success'))
+            Swal.fire({
+                title: 'Berhasil Terkirim!',
+                text: "{{ session('success') }}",
+                icon: 'success',
+                confirmButtonText: 'Siap, Dipahami',
+                confirmButtonColor: '#2563EB',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
+                }
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                icon: 'error',
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#DC2626',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
+                }
+            });
+        @endif
+
+        @if(session('warning'))
+            Swal.fire({
+                title: 'Perhatian',
+                text: "{{ session('warning') }}",
+                icon: 'warning',
+                confirmButtonText: 'Lanjutkan',
+                confirmButtonColor: '#D97706',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'px-5 py-2.5 rounded-xl font-semibold text-sm'
+                }
+            });
+        @endif
+    });
+
+    // 2. MODAL & CONFIRMATION LOGIC
     let activeConfirmRoute = '';
 
     function openDetailModal(kode, routeUrl, items, status, catatan) {
@@ -56,7 +94,7 @@
         const tbody = document.getElementById('modalTableBody');
         tbody.innerHTML = '';
 
-        if (items.length > 0) {
+        if (items && items.length > 0) {
             items.forEach(item => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50/80';
