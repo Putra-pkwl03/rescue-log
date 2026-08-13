@@ -62,9 +62,6 @@ class Posko extends Model
         return $this->hasMany(PoskoFoto::class, 'posko_id');
     }
 
-    // Relasi ke tabel pendataans pengungsi
-    public function pendataans()
-    {
-        return $this->hasMany(Pendataan::class, 'posko_id');
-    }
+ 
 }
+

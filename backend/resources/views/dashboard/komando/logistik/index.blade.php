@@ -9,16 +9,35 @@
     <p class="text-base text-gray-700 mt-2">Kelola, pantau, dan konfirmasi pengajuan kebutuhan logistik dari posko-posko lapangan.</p>
 </div>
 
-<!-- ALERT NOTIFIKASI SUCCESS -->
-@if(session('success'))
-    <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium flex items-center justify-between shadow-sm">
-        <div class="flex items-center gap-2">
-            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
-            <span>{{ session('success') }}</span>
+{{-- 2. Pesan Eror Tangkapan Exception (session('error')) --}}
+@if (session('error'))
+    <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl shadow-xs flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 text-rose-600">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
         </div>
-        <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+        <div class="flex-1 text-sm font-medium">
+            {{ session('error') }}
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 p-1">
             <i data-lucide="x" class="w-4 h-4"></i>
         </button>
+    </div>
+@endif
+
+{{-- 3. Pesan Eror Validasi Form ($errors) --}}
+@if ($errors->any())
+    <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl shadow-xs">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 text-rose-600">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <h4 class="text-sm font-bold">Gagal Memproses Data! Harap periksa input berikut:</h4>
+        </div>
+        <ul class="list-disc pl-11 text-xs space-y-1 text-rose-700 font-medium">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
 @endif
 
@@ -54,7 +73,7 @@
     <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Disetujui</p>
-            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'approved')->count() }}</h3>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->whereIn('status', ['disetujui', 'disetujui_sebagian', 'dalam_pengiriman', 'selesai'])->count() }}</h3>
         </div>
         <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
             <i data-lucide="check-circle-2" class="w-6 h-6"></i>
@@ -74,7 +93,7 @@
     <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Ditolak</p>
-            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'rejected')->count() }}</h3>
+            <h3 class="text-3xl font-bold text-slate-900">{{ $pengajuans->where('status', 'ditolak')->count() }}</h3>
         </div>
         <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
             <i data-lucide="x-circle" class="w-6 h-6"></i>
@@ -95,9 +114,11 @@
         <select name="status" class="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-600 focus:outline-none cursor-pointer">
             <option value="">Semua Status</option>
             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
-            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui Full</option>
-            <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Disetujui Sebagian</option>
-            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+            <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui Full</option>
+            <option value="disetujui_sebagian" {{ request('status') == 'disetujui_sebagian' ? 'selected' : '' }}>Disetujui Sebagian</option>
+            <option value="dalam_pengiriman" {{ request('status') == 'dalam_pengiriman' ? 'selected' : '' }}>Dalam Pengiriman</option>
+            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
         </select>
     </div>
 
@@ -143,13 +164,21 @@
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
                                     <i data-lucide="clock" class="w-3.5 h-3.5"></i> Menunggu ACC
                                 </span>
-                            @elseif($item->status == 'approved')
+                            @elseif($item->status == 'disetujui')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
                                     <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Disetujui Full
                                 </span>
-                            @elseif($item->status == 'partial')
+                            @elseif($item->status == 'disetujui_sebagian')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
                                     <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> Sebagian
+                                </span>
+                            @elseif($item->status == 'dalam_pengiriman')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">
+                                    <i data-lucide="truck" class="w-3.5 h-3.5"></i> Pengiriman
+                                </span>
+                            @elseif($item->status == 'selesai')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200 rounded-full">
+                                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Selesai
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 rounded-full">
@@ -167,7 +196,7 @@
                                     <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium">Air: {{ $item->air_minum_dus }} Dus</span>
                                 @endif
                                 @if($item->makanan_kaleng_pack > 0)
-                                    <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium">Mkn Kaleng: {{ $item->makanan_kaleng_pack }} Pk</span>
+                                    <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-md font-medium font-semibold">Mkn Kaleng: {{ $item->makanan_kaleng_pack }} Pk</span>
                                 @endif
                                 <button onclick="openDetailModal(
                                     '{{ $item->kode_pengajuan }}', 
@@ -192,7 +221,9 @@
                             </div>
                         </td>
 
+                        <!-- AKSI ALUR 2-TAHAP -->
                         <td class="py-4 px-6 text-right">
+                            {{-- TAHAP 1: Menunggu ACC --}}
                             @if($item->status == 'pending')
                                 <button type="button" 
                                     onclick="openActionModal(
@@ -207,8 +238,33 @@
                                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                                     <span>Proses Aksi</span>
                                 </button>
+
+                            {{-- TAHAP 2: Sudah ACC & Belum Ada Pengiriman --}}
+                            @elseif(($item->status == 'disetujui' || $item->status == 'disetujui_sebagian') && !$item->pengiriman)
+                                <button type="button"
+                                    onclick="openScheduleModal(
+                                        '{{ $item->id }}',
+                                        '{{ $item->kode_pengajuan }}',
+                                        '{{ $item->user->name ?? 'Posko Lapangan' }}'
+                                    )"
+                                    class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer animate-pulse">
+                                    <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+                                    <span>Kirim Sekarang</span>
+                                </button>
+
+                            {{-- TAHAP 3: Armada Sudah Dalam Perjalanan atau Selesai --}}
+                            @elseif($item->status == 'dalam_pengiriman' || $item->pengiriman)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg border border-emerald-200">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Dalam Pengiriman
+                                </span>
+                            @elseif($item->status == 'selesai')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-teal-700 bg-teal-50 rounded-lg border border-teal-200">
+                                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Selesai
+                                </span>
+
+                            {{-- Pengajuan Ditolak --}}
                             @else
-                                <span class="text-xs text-slate-400 italic">Selesai Diproses</span>
+                                <span class="text-xs text-slate-400 italic">Pengajuan Ditolak</span>
                             @endif
                         </td>
                     </tr>
@@ -235,12 +291,13 @@
 <x-komando.logistik.action-modal />
 <x-komando.logistik.partial-modal />
 <x-komando.logistik.detail-modal />
+<x-komando.logistik.schedule-modal :armadas="$armadas ?? []" />
 
 <!-- SCRIPT PENGENDALI MODAL -->
 <script>
     let activeItemData = null;
 
-    // --- MODAL PROSES AKSI TERPUSAT ---
+    // --- MODAL PROSES AKSI TERPUSAT (TAHAP 1) ---
     function openActionModal(id, kode, poskoNama, approveUrl, rejectUrl, itemData) {
         activeItemData = itemData;
 
@@ -274,7 +331,6 @@
         form.action = `/komando/logistik/${item.id}/approve-partial`;
         subTitle.innerText = `Nomor Pengajuan: ${item.kode_pengajuan}`;
         
-        // Mengisi nilai awal seluruh 12 item secara otomatis
         if(document.getElementById('part_beras_kg')) document.getElementById('part_beras_kg').value = item.beras_kg || 0;
         if(document.getElementById('part_makanan_kaleng_pack')) document.getElementById('part_makanan_kaleng_pack').value = item.makanan_kaleng_pack || 0;
         if(document.getElementById('part_makanan_bayi_pack')) document.getElementById('part_makanan_bayi_pack').value = item.makanan_bayi_pack || 0;
@@ -296,7 +352,20 @@
         document.getElementById('partialModal').classList.add('hidden');
     }
 
-    // --- MODAL DETAIL PENGAJUAN LOGISTIK ---
+    // --- MODAL PENJADWALAN ARMADA (TAHAP 2) ---
+    function openScheduleModal(pengajuanId, kodePengajuan, poskoNama) {
+        document.getElementById('schedule_pengajuan_id').value = pengajuanId;
+        document.getElementById('scheduleModalSubtitle').innerText = `Pengajuan: ${kodePengajuan} (${poskoNama})`;
+        
+        document.getElementById('scheduleModal').classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeScheduleModal() {
+        document.getElementById('scheduleModal').classList.add('hidden');
+    }
+
+    // --- MODAL DETAIL PENGAJUAN ---
     function openDetailModal(kode, posko, waktu, beras, mknKaleng, mknBayi, minyak, air, popokBayi, popokDewasa, pembalut, hygiene, selimut, matras, obat, catatan) {
         const modal = document.getElementById('detailModal');
         
@@ -336,7 +405,6 @@
         document.getElementById('detailModal').classList.add('hidden');
     }
 
-    // Inisialisasi ikon Lucide
     document.addEventListener("DOMContentLoaded", () => {
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
