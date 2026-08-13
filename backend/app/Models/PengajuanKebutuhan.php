@@ -44,9 +44,4 @@ class PengajuanKebutuhan extends Model
     {
         return $this->belongsTo(Bencana::class, 'bencana_id');
     }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 }

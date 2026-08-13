@@ -13,19 +13,24 @@ use Illuminate\Support\Str;
 class PengajuanController extends Controller
 {
     /**
-     * Display a listing of the resource / Main Page.
+     * Tampilan Utama Halaman Form Pengajuan Logistik.
      */
     public function index()
     {
-        // 1. Ambil data pendataan pengungsi terbaru milik posko/user login
-        $pendataan = Pendataan::where('user_id', Auth::id())->latest()->first();
+        $user = Auth::user();
 
+        // 1. Ambil data pendataan pengungsi terbaru khusus posko user login
+        $pendataan = Pendataan::where('posko_id', $user->posko_id)
+            ->latest()
+            ->first();
+
+        // Jika belum ada pendataan di posko ini, alihkan pengguna
         if (!$pendataan) {
             return redirect()->route('lapangan.pengungsi.index')
                 ->with('error', 'Silakan isi Form Pendataan Pengungsi terlebih dahulu sebelum mengajukan logistik.');
         }
 
-        // 2. Format payload untuk Machine Learning
+        // 2. Format payload untuk dikirim ke Service Machine Learning (FastAPI)
         $payloadML = [
             'total_pengungsi'       => (int) $pendataan->total_pengungsi,
             'anak_balita'           => (int) $pendataan->balita,
@@ -44,7 +49,7 @@ class PengajuanController extends Controller
         // 3. Panggil FastAPI ML Service
         $estimasi = [];
         try {
-            $fastApiUrl = env('FASTAPI_URL') . '/predict';
+            $fastApiUrl = env('FASTAPI_URL', 'http://127.0.0.1:8000') . '/predict';
             $response = Http::timeout(10)->post($fastApiUrl, $payloadML);
 
             if ($response->successful()) {
@@ -55,12 +60,11 @@ class PengajuanController extends Controller
             session()->flash('warning', 'Gagal menghubungkan ke Service AI ML. Anda dapat mengisi jumlah logistik secara manual.');
         }
 
-        // Dipanggil ke index.blade.php
         return view('dashboard.lapangan.pengajuan.index', compact('pendataan', 'estimasi'));
     }
 
     /**
-     * Redirect create ke index
+     * Redirect route 'create' ke index.
      */
     public function create()
     {
@@ -68,10 +72,13 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data pengajuan kebutuhan logistik ke database.
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        // Validasi inputan dari form pengajuan
         $validated = $request->validate([
             'beras_kg'              => 'required|numeric|min:0',
             'makanan_kaleng_pack'   => 'required|numeric|min:0',
@@ -88,10 +95,13 @@ class PengajuanController extends Controller
             'catatan_posko'         => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        // Tambahkan data identitas pengaju dan posko
+        $validated['user_id']        = $user->id;
+        $validated['posko_id']       = $user->posko_id;
         $validated['kode_pengajuan'] = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-        $validated['status'] = 'pending';
+        $validated['status']         = 'pending';
 
+        // Simpan data pengajuan langsung ke tabel pengajuans
         Pengajuan::create($validated);
 
         return redirect()->route('lapangan.pengajuan.index')
