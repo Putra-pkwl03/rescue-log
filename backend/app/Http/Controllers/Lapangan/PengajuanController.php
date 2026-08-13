@@ -15,17 +15,22 @@ class PengajuanController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
-        Log::info('PengajuanController@index - Mengambil data pengajuan untuk User ID: ' . $userId);
+        $user = Auth::user();
+        Log::info('PengajuanController@index - Mengambil data pengajuan untuk Posko ID: ' . $user->posko_id);
 
-        $pendataan = Pendataan::where('user_id', $userId)->latest()->first();
+        // 1. Ambil data pendataan pengungsi terbaru khusus posko user yang sedang login
+        $pendataan = Pendataan::where('posko_id', $user->posko_id)
+            ->latest()
+            ->first();
 
+        // Jika belum ada pendataan di posko ini, alihkan pengguna
         if (!$pendataan) {
-            Log::warning('PengajuanController@index - Pendataan tidak ditemukan untuk User ID: ' . $userId);
+            Log::warning('PengajuanController@index - Pendataan tidak ditemukan untuk Posko ID: ' . $user->posko_id);
             return redirect()->route('lapangan.pengungsi.index')
                 ->with('error', 'Silakan isi Form Pendataan Pengungsi terlebih dahulu sebelum mengajukan logistik.');
         }
 
+        // 2. Format payload untuk dikirim ke Service Machine Learning (FastAPI)
         $payloadML = [
             'total_pengungsi'       => (int) $pendataan->total_pengungsi,
             'anak_balita'           => (int) $pendataan->balita,
@@ -43,7 +48,7 @@ class PengajuanController extends Controller
 
         $estimasi = [];
         try {
-            $fastApiUrl = env('FASTAPI_URL') . '/predict';
+            $fastApiUrl = env('FASTAPI_URL', 'http://127.0.0.1:8000') . '/predict';
             $response = Http::timeout(10)->post($fastApiUrl, $payloadML);
 
             if ($response->successful()) {
@@ -55,8 +60,8 @@ class PengajuanController extends Controller
             session()->flash('warning', 'Gagal menghubungkan ke Service AI ML. Anda dapat mengisi jumlah logistik secara manual.');
         }
 
-        // Ambil riwayat pengajuan milik user
-        $pengajuans = PengajuanKebutuhan::where('user_id', $userId)
+        // Ambil riwayat pengajuan milik posko/user
+        $pengajuans = PengajuanKebutuhan::where('posko_id', $user->posko_id)
             ->latest()
             ->get();
 
@@ -74,7 +79,10 @@ class PengajuanController extends Controller
     {
         $user = Auth::user();
 
-        $pendataan = Pendataan::where('user_id', $user->id)->latest()->first();
+        // Ambil data pendataan berdasarkan posko_id user
+        $pendataan = Pendataan::where('posko_id', $user->posko_id)
+            ->latest()
+            ->first();
 
         if (!$pendataan) {
             return redirect()->route('lapangan.pengungsi.index')

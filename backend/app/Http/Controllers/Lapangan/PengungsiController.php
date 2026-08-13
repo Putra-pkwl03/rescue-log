@@ -3,62 +3,59 @@
 namespace App\Http\Controllers\Lapangan;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Pendataan;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PengungsiController extends Controller
 {
-    /**
-     * Menampilkan Halaman Pendataan Pengungsi (Dashboard Mini)
-     */
     public function index()
     {
-        // 1. Ambil data pendataan terakhir (untuk ditampilkan di kotak ringkasan)
-        $pendataan_terakhir = Pendataan::where('user_id', Auth::id())->latest()->first();
+        $user = Auth::user();
+        
+        // Ambil posko_id dari user yang sedang login
+        $poskoId = $user->posko_id;
 
-        // 2. Ambil riwayat pendataan (untuk ditampilkan di tabel)
-        $riwayat_pendataan = Pendataan::where('user_id', Auth::id())->latest()->get();
+        // Query berdasarkan posko_id (Bukan user_id)
+        $pendataan_terakhir = Pendataan::where('posko_id', $poskoId)
+            ->latest()
+            ->first();
 
-        // 3. Logika Smart Empty State: Jika belum ada data sama sekali, bernilai true
+        $riwayat_pendataan = Pendataan::where('posko_id', $poskoId)
+            ->latest()
+            ->get();
+
         $isFirstTime = $riwayat_pendataan->isEmpty();
 
         return view('dashboard.lapangan.pengungsi.index', compact(
-            'pendataan_terakhir', 
-            'riwayat_pendataan', 
+            'pendataan_terakhir',
+            'riwayat_pendataan',
             'isFirstTime'
         ));
     }
 
-    /**
-     * Menyimpan data pendataan ke database lalu REDIRECT ke Prediksi ML.
-     */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
-            'total_pengungsi'  => 'required|numeric|min:0',
-            'balita'           => 'required|numeric|min:0',
-            'dewasa'           => 'required|numeric|min:0',
-            'ibu_hamil'        => 'required|numeric|min:0',
-            'lansia'           => 'required|numeric|min:0',
-            'disabilitas'      => 'required|numeric|min:0',
-            'tipe_tempat'      => 'required|string',
-            'akses_air'        => 'required|string',
-            'akses_jalan'      => 'required|string',
-            'lama_pengungsian' => 'required|numeric|min:1',
-            'suhu_celcius'     => 'nullable|numeric',
+            'total_pengungsi' => 'required|integer|min:0',
+            'balita'           => 'nullable|integer|min:0',
+            'lansia'           => 'nullable|integer|min:0',
+            'ibu_hamil'        => 'nullable|integer|min:0',
+            'disabilitas'      => 'nullable|integer|min:0',
+            'tipe_tempat'      => 'nullable|string',
             'cuaca'            => 'nullable|string',
+            'suhu_celcius'     => 'nullable|numeric',
+            'catatan'          => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
-        
-        // Fallback jika kosong
-        $validated['suhu_celcius'] = $request->suhu_celcius ?? 28.5;
-        $validated['cuaca'] = $request->cuaca ?? 'Berawan';
+        // Otomatis masukkan posko_id milik user yang sedang login
+        $validated['posko_id'] = $user->posko_id;
 
         Pendataan::create($validated);
 
-        return redirect()->route('lapangan.pengajuan.index')
-            ->with('success', 'Data pendataan & kondisi cuaca real-time berhasil disimpan. Menampilkan estimasi AI.');
+        return redirect()->route('lapangan.pengungsi.index')
+            ->with('success', 'Data pengungsi berhasil diperbarui.');
     }
 }
