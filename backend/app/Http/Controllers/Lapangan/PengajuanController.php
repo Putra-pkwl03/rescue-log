@@ -155,8 +155,9 @@ class PengajuanController extends Controller
 
             Log::info('PengajuanController@store - SUCCESS. ID: ' . $pengajuan->id);
 
-            return redirect()->route('lapangan.pengajuan.index')
-                ->with('success', 'Pengajuan logistik berhasil dikirimkan.');
+            // REDIRECT KE HALAMAN STOK & DISTRIBUSI LAPANGAN
+            return redirect()->route('lapangan.distribusi.index')
+                ->with('success', 'Pengajuan kebutuhan logistik berhasil dikirimkan ke Posko Komando!');
 
         } catch (\Exception $e) {
             Log::error('PengajuanController@store - ERROR: ' . $e->getMessage());
