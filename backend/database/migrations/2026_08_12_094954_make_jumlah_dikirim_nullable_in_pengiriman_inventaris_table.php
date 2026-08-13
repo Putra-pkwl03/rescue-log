@@ -9,14 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengiriman_inventaris', function (Blueprint $table) {
-            $table->integer('jumlah_dikirim')->nullable()->change();
+            // Ubah ke decimal agar aman menyimpan pecahan di PostgreSQL
+            $table->decimal('jumlah_dikirim', 10, 2)->nullable()->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('pengiriman_inventaris', function (Blueprint $table) {
-            $table->integer('jumlah_dikirim')->nullable(false)->change();
+            $table->decimal('jumlah_dikirim', 10, 2)->nullable(false)->change();
         });
     }
 };

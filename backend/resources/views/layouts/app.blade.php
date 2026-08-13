@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Logistik - SiGap BPBD</title>
+    
+    <!-- 1. TITLE DINAMIS (Akan mengambil 'RESCUE-LOG' dari .env) -->
+    <title>@yield('title', config('app.name', 'RESCUE-LOG')) - Posko Komando</title>
+
+    <!-- 2. FAVICON (IKON DI TAB BROWSER) -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
-   
+    
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -35,7 +41,6 @@
     <!-- Global Toast Notification (Kanan Atas) -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Konfigurasi Mixin SweetAlert2 Toast di Kanan Atas
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end', 
@@ -48,7 +53,6 @@
                 }
             });
 
-            // Trigger Notifikasi Sukses
             @if(session('success'))
                 Toast.fire({
                     icon: 'success',
@@ -56,7 +60,6 @@
                 });
             @endif
 
-            // Trigger Notifikasi Gagal / Error
             @if(session('error'))
                 Toast.fire({
                     icon: 'error',
