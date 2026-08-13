@@ -98,4 +98,6 @@ class Posko extends Model
     {
         return $this->hasMany(PoskoFoto::class, 'posko_id');
     }
+
+    
 }

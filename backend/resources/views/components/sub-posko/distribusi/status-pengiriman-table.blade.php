@@ -1,4 +1,5 @@
-<!-- Bagian 1: Status Pengiriman/Distribusi dari Komando -->
+@props(['pengirimans'])
+
 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6">
     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
@@ -35,6 +36,14 @@
                             if($p->matras_terpal_pcs > 0) $details[] = ['nama' => 'Matras / Terpal', 'jumlah' => $p->matras_terpal_pcs . ' Pcs', 'kategori' => 'Tenda/Perlengkapan'];
                             if($p->obat_p3k_paket > 0) $details[] = ['nama' => 'Obat-obatan / P3K', 'jumlah' => $p->obat_p3k_paket . ' Paket', 'kategori' => 'Kesehatan'];
                         }
+
+                        $statusDistribusi = strtolower($item->status_distribusi ?? '');
+                        $statusPengajuan = strtolower($p->status ?? '');
+
+                        // Penentuan flag status
+                        $isSelesai = in_array($statusDistribusi, ['selesai', 'diterima di posko']) || $statusPengajuan == 'selesai';
+                        $isDalamPengiriman = in_array($statusDistribusi, ['dalam_pengiriman', 'dalam_perjalanan']) || $statusPengajuan == 'dalam_pengiriman';
+                        $isDisetujui = in_array($statusPengajuan, ['disetujui', 'disetujui_sebagian']) && !$isDalamPengiriman && !$isSelesai;
                     @endphp
 
                     <tr class="hover:bg-gray-50/50 transition">
@@ -54,29 +63,40 @@
                         </td>
 
                         <td class="py-3.5 px-4">
-                            @if($item->status_distribusi == 'Diterima di Posko')
+                            @if($isSelesai)
                                 <span class="px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full inline-flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     Diterima di Posko
                                 </span>
-                            @else
+                            @elseif($isDalamPengiriman)
                                 <span class="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full inline-flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                    {{ $item->status_distribusi }}
+                                    Dalam Pengiriman
+                                </span>
+                            @elseif($isDisetujui)
+                                <span class="px-3 py-1 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full inline-flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Disetujui (Menunggu Armada)
+                                </span>
+                            @else
+                                <span class="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full inline-flex items-center gap-1.5">
+                                    {{ ucfirst(str_replace('_', ' ', $item->status_distribusi)) }}
                                 </span>
                             @endif
                         </td>
 
                         <td class="py-3.5 px-4 text-gray-600">
                             @if($item->waktu_diterima)
-                                <span class="text-emerald-700 font-medium">{{ $item->waktu_diterima->format('d M Y, H:i') }} WIB</span>
+                                <span class="text-emerald-700 font-medium">{{ \Carbon\Carbon::parse($item->waktu_diterima)->format('d M Y, H:i') }} WIB</span>
+                            @elseif($isDalamPengiriman)
+                                <span class="text-blue-700 font-medium">{{ $item->estimasi_waktu ?? 'Dalam Perjalanan' }}</span>
                             @else
-                                {{ $item->estimasi_waktu ?? 'Hari ini' }}
+                                <span class="text-gray-400 italic">Menunggu Pengiriman</span>
                             @endif
                         </td>
 
                         <td class="py-3.5 px-4 text-right">
-                            @if($item->status_distribusi != 'Diterima di Posko')
+                            @if($isDalamPengiriman)
                                 <button 
                                     type="button" 
                                     onclick="openDetailModal('{{ $p->kode_pengajuan ?? 'REQ-' . $item->id }}', '{{ route('lapangan.stok.konfirmasi', $item->id) }}', {{ json_encode($details) }}, '{{ $item->status_distribusi }}', '{{ $p->catatan_komando ?? '' }}')" 

@@ -4,28 +4,28 @@ namespace App\Http\Controllers\Lapangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pendataan;
-use App\Models\Pengajuan;
+use App\Models\PengajuanKebutuhan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PengajuanController extends Controller
 {
-    /**
-     * Display a listing of the resource / Main Page.
-     */
     public function index()
     {
-        // 1. Ambil data pendataan pengungsi terbaru milik posko/user login
-        $pendataan = Pendataan::where('user_id', Auth::id())->latest()->first();
+        $userId = Auth::id();
+        Log::info('PengajuanController@index - Mengambil data pengajuan untuk User ID: ' . $userId);
+
+        $pendataan = Pendataan::where('user_id', $userId)->latest()->first();
 
         if (!$pendataan) {
+            Log::warning('PengajuanController@index - Pendataan tidak ditemukan untuk User ID: ' . $userId);
             return redirect()->route('lapangan.pengungsi.index')
                 ->with('error', 'Silakan isi Form Pendataan Pengungsi terlebih dahulu sebelum mengajukan logistik.');
         }
 
-        // 2. Format payload untuk Machine Learning
         $payloadML = [
             'total_pengungsi'       => (int) $pendataan->total_pengungsi,
             'anak_balita'           => (int) $pendataan->balita,
@@ -41,7 +41,6 @@ class PengajuanController extends Controller
             'akses_jalan'           => (string) $pendataan->akses_jalan,
         ];
 
-        // 3. Panggil FastAPI ML Service
         $estimasi = [];
         try {
             $fastApiUrl = env('FASTAPI_URL') . '/predict';
@@ -52,49 +51,111 @@ class PengajuanController extends Controller
                 $estimasi = $hasil['estimasi_kebutuhan'] ?? [];
             }
         } catch (\Exception $e) {
+            Log::warning('PengajuanController@index - Gagal terkoneksi FastAPI ML: ' . $e->getMessage());
             session()->flash('warning', 'Gagal menghubungkan ke Service AI ML. Anda dapat mengisi jumlah logistik secara manual.');
         }
 
-        // Dipanggil ke index.blade.php
-        return view('dashboard.lapangan.pengajuan.index', compact('pendataan', 'estimasi'));
+        // Ambil riwayat pengajuan milik user
+        $pengajuans = PengajuanKebutuhan::where('user_id', $userId)
+            ->latest()
+            ->get();
+
+        Log::info('PengajuanController@index - Berhasil mengambil pengajuan. Jumlah record ditemukan: ' . $pengajuans->count());
+
+        return view('dashboard.lapangan.pengajuan.index', compact('pendataan', 'estimasi', 'pengajuans'));
     }
 
-    /**
-     * Redirect create ke index
-     */
     public function create()
     {
         return redirect()->route('lapangan.pengajuan.index');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        $pendataan = Pendataan::where('user_id', $user->id)->latest()->first();
+
+        if (!$pendataan) {
+            return redirect()->route('lapangan.pengungsi.index')
+                ->with('error', 'Silakan isi Form Pendataan Pengungsi terlebih dahulu.');
+        }
+
+        // 1. Validasi 12 Input Kolom Eksplisit
         $validated = $request->validate([
-            'beras_kg'              => 'required|numeric|min:0',
-            'makanan_kaleng_pack'   => 'required|numeric|min:0',
-            'makanan_bayi_pack'     => 'required|numeric|min:0',
-            'minyak_goreng_liter'   => 'required|numeric|min:0',
-            'air_minum_dus'         => 'required|numeric|min:0',
-            'popok_bayi_pcs'        => 'required|numeric|min:0',
-            'popok_dewasa_pcs'      => 'required|numeric|min:0',
-            'pembalut_wanita_pack'  => 'required|numeric|min:0',
-            'hygiene_kit_paket'     => 'required|numeric|min:0',
-            'selimut_pcs'           => 'required|numeric|min:0',
-            'matras_terpal_pcs'     => 'required|numeric|min:0',
-            'obat_p3k_paket'        => 'required|numeric|min:0',
-            'catatan_posko'         => 'nullable|string',
+            'beras_kg'             => 'nullable|numeric|min:0',
+            'air_minum_dus'        => 'nullable|numeric|min:0',
+            'makanan_kaleng_pack'  => 'nullable|numeric|min:0',
+            'makanan_bayi_pack'    => 'nullable|numeric|min:0',
+            'minyak_goreng_liter'  => 'nullable|numeric|min:0',
+            'popok_bayi_pcs'       => 'nullable|numeric|min:0',
+            'popok_dewasa_pcs'     => 'nullable|numeric|min:0',
+            'pembalut_wanita_pack' => 'nullable|numeric|min:0',
+            'hygiene_kit_paket'    => 'nullable|numeric|min:0',
+            'selimut_pcs'          => 'nullable|numeric|min:0',
+            'matras_terpal_pcs'    => 'nullable|numeric|min:0',
+            'obat_p3k_paket'       => 'nullable|numeric|min:0',
+            'catatan_posko'        => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
-        $validated['kode_pengajuan'] = 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-        $validated['status'] = 'pending';
+        // 2. Pastikan setidaknya ada 1 barang yang bernilai lebih dari 0
+        $totalInput = (float) $request->input('beras_kg', 0)
+            + (float) $request->input('air_minum_dus', 0)
+            + (float) $request->input('makanan_kaleng_pack', 0)
+            + (float) $request->input('makanan_bayi_pack', 0)
+            + (float) $request->input('minyak_goreng_liter', 0)
+            + (float) $request->input('popok_bayi_pcs', 0)
+            + (float) $request->input('popok_dewasa_pcs', 0)
+            + (float) $request->input('pembalut_wanita_pack', 0)
+            + (float) $request->input('hygiene_kit_paket', 0)
+            + (float) $request->input('selimut_pcs', 0)
+            + (float) $request->input('matras_terpal_pcs', 0)
+            + (float) $request->input('obat_p3k_paket', 0);
 
-        Pengajuan::create($validated);
+        if ($totalInput <= 0) {
+            return redirect()->back()
+                ->with('error', 'Minimal harus mengajukan 1 jenis logistik dengan jumlah lebih dari 0.')
+                ->withInput();
+        }
 
-        return redirect()->route('lapangan.pengajuan.index')
-            ->with('success', 'Pengajuan logistik berhasil dikirimkan ke Posko Komando.');
+        try {
+            // 3. Simpan langsung 1 record berisi ke-12 kolom barang ke tabel pengajuan_kebutuhan
+            $pengajuan = PengajuanKebutuhan::create([
+                'kode_pengajuan'       => 'REQ-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
+                'user_id'              => $user->id,
+                'posko_id'             => $user->posko_id ?? null,
+                'bencana_id'           => $pendataan->bencana_id ?? null,
+
+                // Map 12 Kolom Barang
+                'beras_kg'             => round((float) $request->input('beras_kg', 0), 2),
+                'air_minum_dus'        => round((float) $request->input('air_minum_dus', 0), 2),
+                'makanan_kaleng_pack'  => round((float) $request->input('makanan_kaleng_pack', 0), 2),
+                'makanan_bayi_pack'    => round((float) $request->input('makanan_bayi_pack', 0), 2),
+                'minyak_goreng_liter'  => round((float) $request->input('minyak_goreng_liter', 0), 2),
+                'popok_bayi_pcs'       => round((float) $request->input('popok_bayi_pcs', 0), 2),
+                'popok_dewasa_pcs'     => round((float) $request->input('popok_dewasa_pcs', 0), 2),
+                'pembalut_wanita_pack' => round((float) $request->input('pembalut_wanita_pack', 0), 2),
+                'hygiene_kit_paket'    => round((float) $request->input('hygiene_kit_paket', 0), 2),
+                'selimut_pcs'          => round((float) $request->input('selimut_pcs', 0), 2),
+                'matras_terpal_pcs'    => round((float) $request->input('matras_terpal_pcs', 0), 2),
+                'obat_p3k_paket'       => round((float) $request->input('obat_p3k_paket', 0), 2),
+
+                'tanggal_pengajuan'    => now(),
+                'status'               => 'pending',
+                'catatan_posko'        => $request->catatan_posko,
+            ]);
+
+            Log::info('PengajuanController@store - SUCCESS. ID: ' . $pengajuan->id);
+
+            return redirect()->route('lapangan.pengajuan.index')
+                ->with('success', 'Pengajuan logistik berhasil dikirimkan.');
+
+        } catch (\Exception $e) {
+            Log::error('PengajuanController@store - ERROR: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Gagal menyimpan pengajuan: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }
