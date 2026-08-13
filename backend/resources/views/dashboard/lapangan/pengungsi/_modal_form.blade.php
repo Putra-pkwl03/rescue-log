@@ -34,7 +34,6 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 Tanggal Pendataan
                             </div>
-                            <!-- Ubah dari PHP now() menjadi elemen ber-ID untuk diisi JavaScript -->
                             <div id="waktu-realtime" class="font-bold text-blue-900">-</div>
                         </div>
 
@@ -63,38 +62,95 @@
                             </div>
                         </div>
 
-                        <!-- Input Hidden agar Suhu & Cuaca ikut terkirim ke Controller saat form disubmit -->
+                        <!-- Input Hidden agar Suhu & Cuaca tersimpan saat submit -->
                         <input type="hidden" name="suhu_celcius" id="input-suhu">
                         <input type="hidden" name="cuaca" id="input-cuaca">
 
-                        <!-- 2. Rincian Kategori Khusus -->
+                        <!-- 2. Rincian Kategori Demografi -->
                         <div>
                             <h4 class="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-4">Rincian Demografi Pengungsi</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-700 mb-1">Total Pengungsi <span class="text-red-500">*</span></label>
-                                    <input type="number" name="total_pengungsi" value="{{ $pendataan_terakhir->total_pengungsi ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
+                                
+                                <!-- Total Pengungsi Otomatis (Readonly) -->
+                                <div class="bg-blue-50/80 border border-blue-200 p-2.5 rounded-xl">
+                                    <label class="block text-xs font-bold text-blue-800 mb-1">
+                                        Total Pengungsi (Otomatis)
+                                    </label>
+                                    <input type="number" 
+                                           name="total_pengungsi" 
+                                           id="input-total-pengungsi"
+                                           value="{{ $pendataan_terakhir->total_pengungsi ?? '0' }}" 
+                                           class="w-full px-3 py-2 rounded-lg bg-white border border-blue-300 font-black text-blue-700 text-base outline-none cursor-not-allowed" 
+                                           readonly>
+                                    <span class="text-[10px] text-blue-600 font-medium block mt-1">*Penjumlahan Balita + Dewasa + Lansia</span>
                                 </div>
+
+                                <!-- Balita -->
                                 <div>
                                     <label class="block text-xs font-medium text-slate-700 mb-1">Anak Balita (0-5 th) <span class="text-red-500">*</span></label>
-                                    <input type="number" name="balita" value="{{ $pendataan_terakhir->balita ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
+                                    <input type="number" 
+                                           name="balita" 
+                                           id="input-balita" 
+                                           oninput="hitungTotalPengungsi()" 
+                                           value="{{ $pendataan_terakhir->balita ?? '' }}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" 
+                                           required>
                                 </div>
+
+                                <!-- Dewasa -->
                                 <div>
                                     <label class="block text-xs font-medium text-slate-700 mb-1">Dewasa (18-59 th) <span class="text-red-500">*</span></label>
-                                    <input type="number" name="dewasa" value="{{ $pendataan_terakhir->dewasa ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
+                                    <input type="number" 
+                                           name="dewasa" 
+                                           id="input-dewasa" 
+                                           oninput="hitungTotalPengungsi()" 
+                                           value="{{ $pendataan_terakhir->dewasa ?? '' }}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" 
+                                           required>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-700 mb-1">Ibu Hamil <span class="text-red-500">*</span></label>
-                                    <input type="number" name="ibu_hamil" value="{{ $pendataan_terakhir->ibu_hamil ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
-                                </div>
+
+                                <!-- Lansia -->
                                 <div>
                                     <label class="block text-xs font-medium text-slate-700 mb-1">Lansia (&ge; 60 th) <span class="text-red-500">*</span></label>
-                                    <input type="number" name="lansia" value="{{ $pendataan_terakhir->lansia ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
+                                    <input type="number" 
+                                           name="lansia" 
+                                           id="input-lansia" 
+                                           oninput="hitungTotalPengungsi()" 
+                                           value="{{ $pendataan_terakhir->lansia ?? '' }}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" 
+                                           required>
                                 </div>
+
+                                <!-- Ibu Hamil -->
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Ibu Hamil <span class="text-red-500">*</span></label>
+                                    <input type="number" 
+                                           name="ibu_hamil" 
+                                           value="{{ $pendataan_terakhir->ibu_hamil ?? '' }}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" 
+                                           required>
+                                </div>
+
+                                <!-- Disabilitas -->
                                 <div>
                                     <label class="block text-xs font-medium text-slate-700 mb-1">Disabilitas <span class="text-red-500">*</span></label>
-                                    <input type="number" name="disabilitas" value="{{ $pendataan_terakhir->disabilitas ?? '' }}" placeholder="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" required>
+                                    <input type="number" 
+                                           name="disabilitas" 
+                                           value="{{ $pendataan_terakhir->disabilitas ?? '' }}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm outline-none" 
+                                           required>
                                 </div>
+
                             </div>
                         </div>
 
@@ -138,7 +194,7 @@
 
                     </div>
 
-                    <!-- FOOTER MODAL (Tombol Submit) -->
+                    <!-- FOOTER MODAL -->
                     <div class="bg-slate-50 px-6 py-4 flex flex-row-reverse rounded-b-2xl">
                         <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 sm:ml-3 sm:w-auto">
                             Simpan & Hitung Logistik AI
@@ -154,34 +210,44 @@
 </div>
 
 <script>
+    // Fungsi Menghitung Total Pengungsi Otomatis
+    function hitungTotalPengungsi() {
+        const balita = parseInt(document.getElementById('input-balita').value) || 0;
+        const dewasa = parseInt(document.getElementById('input-dewasa').value) || 0;
+        const lansia = parseInt(document.getElementById('input-lansia').value) || 0;
+
+        const total = balita + dewasa + lansia;
+        document.getElementById('input-total-pengungsi').value = total;
+    }
+
     function openPendataanModal() {
-        // 1. Set Tanggal Realtime (seperti sebelumnya)
+        // 1. Set Tanggal Realtime
         const now = new Date();
         const formatWaktu = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
         document.getElementById('waktu-realtime').innerText = formatWaktu;
 
-        // 2. Ambil Koordinat Posko dari PHP ($subPosko)
+        // Hitung ulang total saat modal dibuka
+        hitungTotalPengungsi();
+
+        // 2. Ambil Koordinat Posko
         const lat = "{{ $subPosko->latitude ?? -7.7956 }}";
         const lon = "{{ $subPosko->longitude ?? 110.3695 }}";
 
-        // 3. Request Data Cuaca Real-time (Contoh menggunakan API publik gratis: Open-Meteo)
+        // 3. Request Data Cuaca Real-time
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
             .then(response => response.json())
             .then(data => {
                 if(data && data.current_weather) {
-                    const temp = data.current_weather.temperature; // Suhu dalam celcius
+                    const temp = data.current_weather.temperature;
                     const weatherCode = data.current_weather.weathercode;
 
-                    // Konversi sederhana kode cuaca open-meteo ke teks deskripsi
                     let deskripsiCuaca = "Cerah / Berawan";
                     if(weatherCode >= 51 && weatherCode <= 67) deskripsiCuaca = "Hujan Ringan/Sedang";
                     if(weatherCode >= 80 && weatherCode <= 99) deskripsiCuaca = "Hujan Deras / Badai";
 
-                    // Tampilkan ke UI Modal
                     document.getElementById('cuaca-suhu').innerText = temp + " °C";
                     document.getElementById('cuaca-kondisi').innerText = deskripsiCuaca;
 
-                    // Masukkan ke input hidden agar tersimpan ke database saat disubmit
                     document.getElementById('input-suhu').value = temp;
                     document.getElementById('input-cuaca').value = deskripsiCuaca;
                 }
@@ -194,7 +260,7 @@
                 document.getElementById('input-cuaca').value = "Berawan";
             });
 
-        // 4. Animasi Buka Modal (Bawaan)
+        // 4. Animasi Buka Modal
         const modal = document.getElementById('modal-pendataan');
         const backdrop = document.getElementById('modal-backdrop');
         const panel = document.getElementById('modal-panel');

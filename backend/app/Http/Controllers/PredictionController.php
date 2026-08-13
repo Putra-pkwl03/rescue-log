@@ -30,8 +30,8 @@ class PredictionController extends Controller
 
         // 2. Tambahkan data ID user/posko dan parameter BMKG
         $validated['user_id'] = Auth::id();
-        $validated['suhu_celcius'] = 28.5; // Sesuaikan jika ada integrasi API BMKG
-        $validated['cuaca'] = 'Hujan Deras'; // Sesuaikan jika ada integrasi API BMKG
+        $validated['suhu_celcius'] = 28.5; 
+        $validated['cuaca'] = 'Hujan Deras';
 
         // 3. Simpan atau perbarui data pendataan posko
         Pendataan::updateOrCreate(
