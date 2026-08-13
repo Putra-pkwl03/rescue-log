@@ -14,7 +14,7 @@
 
             <!-- Header Brand -->
             <div class="relative z-10 flex items-center space-x-1.5 bg-transparent">
-                <img src="{{ asset('img/rescue-log.png') }}" alt="Logo BPBD"
+                <img src="{{ asset('img/Rescue-log.png') }}" alt="Logo BPBD"
                     class="w-[100px] h-[120px] object-contain flex-shrink-0 bg-transparent">
 
                 <div class="bg-transparent">
@@ -78,7 +78,7 @@
 
                 <!-- Header Form -->
                 <div class="text-center mb-6">
-                    <img src="{{ asset('img/rescue-log.png') }}" alt="Logo Rescue Log" class="w-16 h-16 object-contain mx-auto mb-3">
+                    <img src="{{ asset('img/Rescue-log.png') }}" alt="Logo Rescue Log" class="w-16 h-16 object-contain mx-auto mb-3">
                     <h3 class="text-2xl font-bold text-slate-900">Selamat Datang</h3>
                     <p class="text-slate-500 text-sm mt-1">Silakan pilih jenis akses masuk RESCUE-LOG</p>
                 </div>

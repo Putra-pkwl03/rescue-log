@@ -9,7 +9,7 @@
     <!-- Header Logo & Subtitle -->
     <div class="p-5 flex items-center gap-3 border-b border-indigo-900/40">
         <div class="w-10 h-10 flex-shrink-0">
-            <img src="{{ asset('img/rescue-log.png') }}" alt="Logo" class="w-10 h-10 object-contain">
+            <img src="{{ asset('img/Rescue-log.png') }}" alt="Logo" class="w-10 h-10 object-contain">
         </div>
 
         <div x-show="sidebarOpen" x-transition.opacity class="whitespace-nowrap overflow-hidden">
