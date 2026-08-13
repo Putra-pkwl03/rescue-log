@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_barang');
             $table->string('kategori');
-            $table->integer('jumlah')->default(0);
+            $table->float('jumlah', 10, 2)->default(0);
             $table->string('satuan'); 
             $table->text('keterangan')->nullable();
             $table->timestamps();

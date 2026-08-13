@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
         // Permintaan Kebutuhan
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
 
+        
         // Manajemen Stok Inventaris
         Route::get('/inventaris', [StokInventarisController::class, 'index'])->name('inventaris');
         Route::post('/inventaris', [StokInventarisController::class, 'store'])->name('inventaris.store');

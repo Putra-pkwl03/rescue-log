@@ -60,18 +60,23 @@ class AuthController extends Controller
 
             $user = Auth::user();
             
-            if ($user->role === 'admin') {
-                return redirect()->intended(route('admin.dashboard'))
-                    ->with('success', 'Berhasil login! Selamat datang di Dashboard Admin.');
+
+            // Pengalihan berdasarkan Role + Flash Message (Gunakan route() langsung)
+            if ($user->role === 'admin' || $user->role === 'bpbd') {
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Berhasil login! Selamat datang di Dashboard Admin BPBD.');
             } 
-            elseif ($user->role === 'koordinator_komando') {
-                return redirect()->intended(route('komando.dashboard'))
+            elseif (in_array($user->role, ['komando', 'koordinator_komando', 'posko_komando'])) {
+                return redirect()->route('komando.dashboard')
                     ->with('success', 'Berhasil login! Selamat datang di Posko Komando.');
             } 
             elseif ($user->role === 'lapangan') {
-                return redirect()->intended(route('lapangan.dashboard'))
+                return redirect()->route('lapangan.dashboard')
                     ->with('success', 'Berhasil login! Selamat datang di Posko Lapangan.');
             }
+
+            // Fallback jika role tidak terdaftar di atas
+            return redirect('/login')->with('error', 'Role akun Anda tidak memiliki akses dashboard.');
         }
 
         return back()->withErrors([
@@ -85,6 +90,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'Anda telah berhasil keluar dari akun.');
+        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar dari sistem.');
     }
 }

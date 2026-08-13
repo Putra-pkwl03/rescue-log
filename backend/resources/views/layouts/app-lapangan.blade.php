@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'Pos Lapangan') }}</title>
+    <title>@yield('title', config('app.name', 'RESCUE-LOG')) - Posko Lapangan</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <!-- Tailwind CSS (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Alpine.js untuk Dropdown Navbar & Indikator Sinyal PWA -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Stack Stylesheets khusus dari halaman/komponen (seperti Leaflet CSS) -->
     @stack('styles')
 </head>
 
@@ -31,10 +33,50 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-4 text-center text-sm text-gray-500">
-        &copy; {{ date('Y') }} Alur Pos Komando & Pos Lapangan.
+        &copy; {{ date('Y') }} RESCUE-LOG - Posko Lapangan.
     </footer>
 
-    <!-- Stack Scripts khusus dari halaman/komponen (seperti Leaflet JS & Map Init) -->
+    <!-- CDN SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Script Global Toast SweetAlert2 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end', // Pojok Kanan Atas
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            @if(session('success'))
+                Toast.fire({
+                    icon: 'success',
+                    title: "{{ session('success') }}"
+                });
+            @endif
+
+            @if(session('error'))
+                Toast.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}"
+                });
+            @endif
+
+            @if(session('warning'))
+                Toast.fire({
+                    icon: 'warning',
+                    title: "{{ session('warning') }}"
+                });
+            @endif
+        });
+    </script>
+
     @stack('scripts')
 
 </body>
