@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Komando;
 use App\Http\Controllers\Controller;
 use App\Models\Bencana;
 use App\Models\Posko;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class SubPoskoController extends Controller
@@ -65,6 +69,7 @@ class SubPoskoController extends Controller
             return back()->with('error', 'Gagal membuat Sub-Posko. Anda tidak memiliki Posko Induk.');
         }
 
+        // Cukup validasi input bawaan form awal (tanpa email & password)
         $validated = $request->validate([
             'nama_posko'       => 'required|string|max:255',
             'bencana_id'       => [
@@ -85,25 +90,52 @@ class SubPoskoController extends Controller
             $fotoPath = $request->file('foto')->store('posko-images', 'public');
         }
 
-        // Tidak perlu memanggil Posko::generateKodeUndangan() di sini
-        // Kode undangan otomatis terisi melalui event booted() di model Posko
-        $subPosko = Posko::create([
-            'nama_posko'       => $validated['nama_posko'],
-            'tipe_posko'       => 'lapangan_kecil',
-            'parent_id'        => $user->posko_id, 
-            'bencana_id'       => $validated['bencana_id'],
-            'penanggung_jawab' => $validated['penanggung_jawab'],
-            'kontak_hp'        => $validated['kontak_hp'] ?? null,
-            'jumlah_petugas'   => $validated['jumlah_petugas'] ?? 0,
-            'lokasi'           => $validated['lokasi'] ?? null,
-            'latitude'         => $validated['latitude'] ?? null,
-            'longitude'        => $validated['longitude'] ?? null,
-            'foto'             => $fotoPath,
-            'status'           => 'aktif',
-        ]);
+        DB::beginTransaction();
+        try {
+            // 1. Buat Sub Posko Baru
+            $subPosko = Posko::create([
+                'nama_posko'       => $validated['nama_posko'],
+                'tipe_posko'       => 'lapangan_kecil',
+                'parent_id'        => $user->posko_id, 
+                'bencana_id'       => $validated['bencana_id'],
+                'penanggung_jawab' => $validated['penanggung_jawab'],
+                'kontak_hp'        => $validated['kontak_hp'] ?? null,
+                'jumlah_petugas'   => $validated['jumlah_petugas'] ?? 0,
+                'lokasi'           => $validated['lokasi'] ?? null,
+                'latitude'         => $validated['latitude'] ?? null,
+                'longitude'        => $validated['longitude'] ?? null,
+                'foto'             => $fotoPath,
+                'status'           => 'aktif',
+            ]);
 
-        return redirect()->route('komando.posko-kecil.index')
-            ->with('success', "Sub-Posko '{$subPosko->nama_posko}' berhasil didaftarkan. Kode Akses: {$subPosko->kode_undangan}");
+            // 2. Generate Email Dummy Unik & Password Default
+            $slugNamaPosko = Str::slug($validated['nama_posko']);
+            $dummyEmail    = $slugNamaPosko . '.' . time() . '@posko.id'; // contoh: posko-mawar.1712345678@posko.id
+            $defaultPass   = 'password123';
+
+            // 3. Buat Akun User di Tabel users
+            User::create([
+                'name'     => $validated['penanggung_jawab'],
+                'email'    => $dummyEmail,
+                'password' => Hash::make($defaultPass),
+                'role'     => 'lapangan',      // Sesuaikan role jika di database Anda beda nama
+                'posko_id' => $subPosko->id,   // Hubungkan ke posko yang baru dibuat
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('komando.posko-kecil.index')
+                ->with('success', "Sub-Posko '{$subPosko->nama_posko}' berhasil dibuat! Credential Login -> Email: {$dummyEmail} | Password: {$defaultPass}");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($fotoPath && Storage::disk('public')->exists($fotoPath)) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            return back()->with('error', 'Gagal menambahkan Sub-Posko: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function show($id)
