@@ -18,4 +18,5 @@
             <span class="font-semibold text-white">14:32 WIB</span>
         </div>
     </div>
+
 </div>
