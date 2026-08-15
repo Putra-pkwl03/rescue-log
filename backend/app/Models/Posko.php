@@ -30,29 +30,7 @@ class Posko extends Model
         'status',
     ];
 
-    // ==========================================
-    // LOCAL SCOPES (Penambahan untuk Fix Error)
-    // ==========================================
-
-    /**
-     * Scope untuk menyaring Posko Komando Utama
-     */
-    public function scopeKomando($query)
-    {
-        return $query->where('tipe_posko', 'komando');
-    }
-
-    /**
-     * Scope untuk menyaring Sub-Posko / Posko Lapangan
-     */
-    public function scopeSubPosko($query)
-    {
-        return $query->where('tipe_posko', 'posko_kecil'); 
-    }
-
-    // ==========================================
-    // RELASI DATABASE
-    // ==========================================
+    // --- RELASI ---
 
     public function bpbd()
     {
@@ -84,29 +62,6 @@ class Posko extends Model
         return $this->hasMany(PoskoFoto::class, 'posko_id');
     }
 
-    // ==========================================
-    // BOOT & HELPER FUNCTIONS
-    // ==========================================
-
-    protected static function booted()
-    {
-        static::creating(function ($posko) {
-            if (empty($posko->kode_undangan)) {
-                $posko->kode_undangan = self::generateKodeUndangan();
-            }
-        });
-    }
-
-    /**
-     * Method untuk generate kode undangan unik.
-     */
-    public static function generateKodeUndangan(): string
-    {
-        do {
-            // Contoh format: PSK-A8F2K9 (Unik & mudah dibaca)
-            $code = 'PSK-' . strtoupper(Str::random(6));
-        } while (self::where('kode_undangan', $code)->exists());
-
-        return $code;
-    }
+ 
 }
+
