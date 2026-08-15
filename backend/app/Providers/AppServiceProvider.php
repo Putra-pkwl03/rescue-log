@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL; // <-- Tambahkan ini
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,9 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Paksa semua URL / Form Submit menggunakan HTTPS di lingkungan Production (Railway)
-        if (config('app.env') === 'production' || app()->environment('production')) {
-            URL::forceScheme('https');
-        }
+        //
     }
 }

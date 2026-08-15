@@ -29,36 +29,6 @@
         </div>
     </div>
 
-    {{-- ALERT PESAN ERROR / GAGAL --}}
-    @if (session('error'))
-        <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-sm shadow-sm">
-            <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-                <h4 class="font-bold">Terjadi Kesalahan!</h4>
-                <p class="text-xs mt-0.5 text-rose-700">{{ session('error') }}</p>
-            </div>
-        </div>
-    @endif
-
-    {{-- ALERT VALIDATION ERRORS (Tampil jika ada field wajib yang belum/salah diisi) --}}
-    @if ($errors->any())
-        <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-2 shadow-sm">
-            <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
-                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>Mohon periksa kembali inputan Anda:</span>
-            </div>
-            <ul class="list-disc list-inside text-xs text-rose-700 space-y-1 pl-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     {{-- Form Utama --}}
     <form action="{{ route('komando.posko-kecil.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -83,7 +53,7 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                 Nama Posko <span class="text-rose-500">*</span>
                             </label>
-                            <input type="text" name="nama_posko" value="{{ old('nama_posko') }}" placeholder="Contoh: Posko Lapangan A" class="w-full px-3.5 py-2.5 rounded-xl border @error('nama_posko') border-rose-500 ring-1 ring-rose-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
+                            <input type="text" name="nama_posko" value="{{ old('nama_posko') }}" placeholder="Contoh: Posko Lapangan A" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
                             @error('nama_posko') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
                         </div>
 
@@ -92,7 +62,7 @@
                                 Jumlah Petugas
                             </label>
                             <div class="relative">
-                                <input type="number" name="jumlah_petugas" value="{{ old('jumlah_petugas') }}" placeholder="10" class="w-full pr-3.5 pl-9 py-2.5 rounded-xl border @error('jumlah_petugas') border-rose-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
+                                <input type="number" name="jumlah_petugas" value="{{ old('jumlah_petugas') }}" placeholder="10" class="w-full pr-3.5 pl-9 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -109,7 +79,7 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                 Penanggung Jawab <span class="text-rose-500">*</span>
                             </label>
-                            <input type="text" name="penanggung_jawab" value="{{ old('penanggung_jawab') }}" placeholder="Nama Koordinator" class="w-full px-3.5 py-2.5 rounded-xl border @error('penanggung_jawab') border-rose-500 ring-1 ring-rose-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
+                            <input type="text" name="penanggung_jawab" value="{{ old('penanggung_jawab') }}" placeholder="Nama Koordinator" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all" required>
                             @error('penanggung_jawab') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
                         </div>
 
@@ -117,7 +87,7 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                 No. WhatsApp/HP
                             </label>
-                            <input type="text" name="kontak_hp" value="{{ old('kontak_hp') }}" placeholder="08xxxxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border @error('kontak_hp') border-rose-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
+                            <input type="text" name="kontak_hp" value="{{ old('kontak_hp') }}" placeholder="08xxxxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all">
                             @error('kontak_hp') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -130,8 +100,7 @@
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                             Alamat / Patokan Lokasi
                         </label>
-                        <textarea name="lokasi" rows="3" placeholder="Nama dusun, RT/RW, atau patokan lokasi terdekat" class="w-full px-3.5 py-2.5 rounded-xl border @error('lokasi') border-rose-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all resize-none">{{ old('lokasi') }}</textarea>
-                        @error('lokasi') <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span> @enderror
+                        <textarea name="lokasi" rows="3" placeholder="Nama dusun, RT/RW, atau patokan lokasi terdekat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium text-slate-800 placeholder-slate-400 transition-all resize-none">{{ old('lokasi') }}</textarea>
                     </div>
 
                 </div>
