@@ -25,6 +25,7 @@
 <!-- MODAL POPUP COMPONENTS -->
 <x-sub-posko.distribusi.detail-modal />
 
+
 <!-- FORM HIDDEN UNTUK EKSEKUSI KONFIRMASI TERIMA SEGERA -->
 <form id="directConfirmForm" method="POST" class="hidden">
     @csrf
@@ -59,6 +60,7 @@
         @endif
 
         @if(session('error'))
+
             Toast.fire({
                 icon: 'error',
                 title: "{{ session('error') }}"
@@ -66,12 +68,14 @@
         @endif
 
         @if(session('warning'))
+
             Toast.fire({
                 icon: 'warning',
                 title: "{{ session('warning') }}"
             });
         @endif
     });
+
 
     // 2. FUNGSI JAVASCRIPT MODAL & EKSEKUSI TERIMA LANGSUNG SELESAI
     let activeConfirmRoute = '';
@@ -95,6 +99,7 @@
         const tbody = document.getElementById('modalTableBody');
         if (tbody) {
             tbody.innerHTML = '';
+
 
             if (items && items.length > 0) {
                 items.forEach(item => {

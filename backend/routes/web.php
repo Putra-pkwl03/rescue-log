@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ============ ADMIN (BPBD) ============
+   // ============ ADMIN (BPBD) ============
     Route::middleware('role:admin,bpbd')->prefix('admin')->name('admin.')->group(function () {
         // Dashboard Admin
         Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
@@ -60,11 +60,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/posko/{id}/aktifkan', [Admin\DashboardController::class, 'aktifkanPosko'])->name('posko.aktifkan');
         Route::post('/posko/{id}/selesaikan', [Admin\DashboardController::class, 'selesaikanPosko'])->name('bencana.finish');
 
-        // Manajemen Bencana
+       // Manajemen Bencana
         Route::get('/bencana', [Admin\BencanaController::class, 'index'])->name('bencana');
-        Route::post('/bencana/{id}/reject', [Admin\BencanaController::class, 'reject'])->name('bencana.reject');
-        Route::post('/bencana/{id}/approve', [Admin\BencanaController::class, 'approve'])->name('bencana.approve');
+        Route::post('/bencana/{id}/reject', [Admin\BencanaController::class, 'rejectPending'])->name('bencana.reject');
 
+        // UBAH BARIS INI (arahkan ke validateAndActivate):
+        Route::post('/bencana/validate/{id}', [Admin\BencanaController::class, 'validateAndActivate'])->name('bencana.approve');
         // Permintaan Kebutuhan
         Route::get('/permintaan', fn() => view('dashboard.admin.permintaan.index'))->name('permintaan');
 
@@ -75,8 +76,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/inventaris/{id}', [StokInventarisController::class, 'update'])->name('inventaris.update');
         Route::delete('/inventaris/{id}', [StokInventarisController::class, 'destroy'])->name('inventaris.destroy');
 
-        // Distribusi Logistik & Rute Peta Admin
-        Route::get('/distribusi', [KomandoDistribusiController::class, 'index'])->name('distribusi.index');
+        // Distribusi Logistik & Rute Peta Admin (DIBETULKAN DI SINI)
+        Route::get('/distribusi', [DistribusiController::class, 'index'])->name('distribusi.index'); 
         Route::post('/distribusi', [PengirimanController::class, 'store'])->name('distribusi.store');
         Route::patch('/distribusi/{id}/status', [PengirimanController::class, 'updateStatus'])->name('distribusi.update-status');
 

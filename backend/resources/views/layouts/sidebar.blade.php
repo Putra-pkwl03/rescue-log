@@ -9,7 +9,7 @@
     <!-- Header Logo & Subtitle -->
     <div class="p-5 flex items-center gap-3 border-b border-indigo-900/40">
         <div class="w-10 h-10 flex-shrink-0">
-            <img src="{{ asset('img/rescue-log.png') }}" alt="Logo" class="w-10 h-10 object-contain">
+            <img src="{{ asset('img/Rescue-log.png') }}" alt="Logo" class="w-10 h-10 object-contain">
         </div>
 
         <div x-show="sidebarOpen" x-transition.opacity class="whitespace-nowrap overflow-hidden">
@@ -55,7 +55,7 @@
                 <a href="{{ route('admin.inventaris') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('admin.inventaris*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
                     <x-fas-boxes-stacked class="w-5 h-5 shrink-0" />
-                    <span x-show="sidebarOpen" class="whitespace-nowrap">Inventaris & Prediksi</span>
+                    <span x-show="sidebarOpen" class="whitespace-nowrap">Inventaris Stok</span>
                 </a>
 
                 <!-- 3. Distribusi (Menggunakan ikon Truk Pengiriman) -->
@@ -101,7 +101,7 @@
                 <a href="{{ route('komando.posko-kecil.index') }}"
                     class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 {{ request()->routeIs('komando.posko-kecil.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-indigo-200/70 hover:bg-white/10 hover:text-white' }}">
                     <x-heroicon-s-map-pin class="w-5 h-5 shrink-0" />
-                    <span x-show="sidebarOpen" class="whitespace-nowrap">Pendataan Pos Kecil</span>
+                    <span x-show="sidebarOpen" class="whitespace-nowrap">Pendataan Sub Posko</span>
                 </a>
 
                 {{-- MENU LAPANGAN --}}

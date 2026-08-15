@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- 1. TITLE DINAMIS (Akan mengambil 'RESCUE-LOG' dari .env) -->
-    <title>@yield('title', config('app.name', 'RESCUE-LOG')) - Posko Komando</title>
+    <title>@yield('title', config('app.name', 'Rscue-Log'))</title>
 
     <!-- 2. FAVICON (IKON DI TAB BROWSER) -->
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <!-- Diarahkan ke file Rescue-log.png di public/img/ -->
+    <link rel="icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
