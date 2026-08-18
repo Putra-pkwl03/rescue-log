@@ -7,8 +7,6 @@
     <!-- 1. TITLE DINAMIS (Akan mengambil 'RESCUE-LOG' dari .env) -->
     <title>@yield('title', config('app.name', 'Rscue-Log'))</title>
 
-    <!-- 2. FAVICON (IKON DI TAB BROWSER) -->
-    <!-- Diarahkan ke file Rescue-log.png di public/img/ -->
     <link rel="icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('img/Rescue-log.png') }}">
 
