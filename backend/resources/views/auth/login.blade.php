@@ -259,39 +259,41 @@
             }
 
             document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
+                // Initialize Lucide icons if available
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
 
-            @if($errors->has('kode_undangan') || old('kode_undangan'))
-                switchLoginMode('subposko');
-            @else
-                switchLoginMode('komando');
-            @endif
+                // Restore active state if validation returned error on kode_undangan
+                @if(old('kode_undangan'))
+                    switchLoginMode('subposko');
+                @else
+                    switchLoginMode('komando');
+                @endif
 
-            // Toast SweetAlert
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
+                // Toast SweetAlert
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                @if (session('success'))
+                    Toast.fire({
+                        icon: 'success',
+                        title: "{{ session('success') }}"
+                    });
+                @endif
+
+                @if (session('error'))
+                    Toast.fire({
+                        icon: 'error',
+                        title: "{{ session('error') }}"
+                    });
+                @endif
             });
-
-            @if (session('success'))
-                Toast.fire({
-                    icon: 'success',
-                    title: "{{ session('success') }}"
-                });
-            @endif
-
-            @if (session('error'))
-                Toast.fire({
-                    icon: 'error',
-                    title: "{{ session('error') }}"
-                });
-            @endif
-        });
         </script>
 
     </div>
